@@ -1,0 +1,121 @@
+<div id="subscription-list">
+    {{if .Subscriptions}}
+    <div class="subscription-stack">
+        {{range .Subscriptions}}
+        <div class="subscription-card interactive-sticker" data-renewal="{{if .RenewalDate}}{{fmtDate .RenewalDate "2006-01-02"}}{{end}}" data-status="{{.Status}}" data-usage="{{.Usage}}" data-reminder-enabled="{{if .ReminderEnabled}}true{{else}}false{{end}}">
+            <div class="subscription-card-main min-w-0">
+                <div class="subscription-avatar flex items-center justify-center shrink-0">
+                    {{if .IconURL}}
+                    <img src="{{.IconURL}}" alt="{{.Name}}" class="w-full h-full object-contain rounded-xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden w-full h-full items-center justify-center rounded-xl bg-white/5 text-pink-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    {{else}}
+                    <div class="w-full h-full flex items-center justify-center rounded-xl bg-white/5 text-pink-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    {{end}}
+                </div>
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h3 class="text-base font-semibold text-white truncate">{{.Name}}</h3>
+                        <span class="anime-badge">{{.Category.Name}}</span>
+                    </div>
+                    <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-300">
+                        <span>{{if eq .Schedule "Monthly"}}每月{{else if eq .Schedule "Quarterly"}}每季度{{else if eq .Schedule "Annual"}}每年{{else if eq .Schedule "Weekly"}}每周{{else if eq .Schedule "Daily"}}每天{{else}}{{.Schedule}}{{end}}</span>
+                        {{if .RenewalDate}}
+                        <span>续费 {{fmtDate .RenewalDate $.GoDateFormat}}</span>
+                        {{else}}
+                        <span>未设置续费日期</span>
+                        {{end}}
+                        {{if .URL}}
+                        <a href="{{.URL}}" target="_blank" class="text-primary hover:text-pink-200 truncate">打开网站</a>
+                        {{end}}
+                    </div>
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                        <span class="status-pill subscription-status-chip" data-role="status-chip">
+                            <img class="status-chip-still" src="/static/images/chibi/chibi-red-envelope-still.png" alt="">
+                            <span class="status-chip-text">正常</span>
+                        </span>
+                        <span class="status-pill">
+                            {{if .ReminderEnabled}}
+                            <img src="/static/images/chibi/chibi-cat-ears-still.png" alt="">
+                            <span>提醒已启用</span>
+                            {{else}}
+                            <img src="/static/images/chibi/chibi-peek-still.png" alt="">
+                            <span>提醒已关闭</span>
+                            {{end}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-3 ml-auto">
+                <div class="text-right min-w-[120px]">
+                    {{if .ShowConversion}}
+                    <p class="text-xl font-bold text-white">{{.DisplayCurrencySymbol}}{{printf "%.2f" .ConvertedCost}}</p>
+                    <p class="text-xs text-slate-300">{{.OriginalCurrency}} {{printf "%.2f" .Cost}}</p>
+                    {{else}}
+                    <p class="text-xl font-bold text-white">{{.DisplayCurrencySymbol}}{{printf "%.2f" .Cost}}</p>
+                    <p class="text-xs text-slate-300">{{if eq .Status "Active"}}启用中{{else if eq .Status "Cancelled"}}已取消{{else if eq .Status "Paused"}}已暂停{{else if eq .Status "Trial"}}试用中{{else}}{{.Status}}{{end}}</p>
+                    {{end}}
+                </div>
+
+                <button type="button" class="sticker-button max-w-[220px] reminder-action" data-role="reminder-action">
+                    <span class="sticker-pair">
+                        <img class="sticker-still reminder-still" src="/static/images/chibi/chibi-cat-ears-still.png" alt="">
+                        <img class="sticker-animated reminder-animated" src="/static/images/chibi/chibi-cat-ears.png" alt="">
+                    </span>
+                    <span class="sticker-button-copy">
+                        <strong class="reminder-title">设置提醒</strong>
+                        <span class="reminder-copy">为下一次扣费保留提醒位</span>
+                    </span>
+                </button>
+
+                <div class="flex items-center gap-2">
+                    {{if .Notes}}
+                    <div class="relative group">
+                        <button class="h-10 w-10 rounded-xl glass-card-soft text-slate-200 hover:text-white transition-colors duration-150" aria-label="查看备注" aria-describedby="note-tooltip-{{.ID}}" title="查看备注">
+                            <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                        <div id="note-tooltip-{{.ID}}" class="absolute right-0 bottom-full mb-2 w-64 p-2 rounded-xl glass-card text-xs text-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                            {{.Notes}}
+                        </div>
+                    </div>
+                    {{end}}
+                    <button hx-get="/form/subscription/{{.ID}}" hx-target="#modal-content" hx-trigger="click" onclick="document.getElementById('modal').classList.remove('hidden')" class="h-10 w-10 rounded-xl glass-card-soft text-slate-200 hover:text-white transition-colors duration-150" title="编辑">
+                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </button>
+                    <button hx-delete="/api/subscriptions/{{.ID}}" hx-confirm="确定要删除这项订阅吗？" hx-target="#subscription-list" hx-swap="outerHTML" class="h-10 w-10 rounded-xl glass-card-soft text-slate-200 hover:text-rose-300 transition-colors duration-150" title="删除">
+                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="empty-state glass-card">
+        <span class="sticker-pair interactive-sticker inline-block">
+            <img class="sticker-still" src="/static/images/chibi/chibi-peek-still.png" alt="">
+            <img class="sticker-animated" src="/static/images/chibi/chibi-peek.png" alt="">
+        </span>
+        <h3>当前还没有订阅记录</h3>
+        <p>添加第一项订阅后，系统会开始跟踪支出、提醒与使用状态。</p>
+        <button hx-get="/form/subscription" hx-target="#modal-content" hx-trigger="click" onclick="document.getElementById('modal').classList.remove('hidden')" class="glow-button mt-6 inline-flex items-center rounded-xl px-5 py-3 text-sm font-semibold text-white">
+            新增第一项订阅
+        </button>
+    </div>
+    {{end}}
+</div>

@@ -1,0 +1,352 @@
+<div class="p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{if .IsEdit}}编辑订阅{{else}}新增订阅{{end}}
+        </h3>
+        <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-150">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div id="form-errors" class="mb-4"></div>
+
+    <form {{if .IsEdit}}hx-put="/api/subscriptions/{{.Subscription.ID}}"{{else}}hx-post="/api/subscriptions"{{end}}
+          hx-target="#form-errors"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(event.detail.successful) { if(event.detail.xhr.status === 201 || event.detail.xhr.status === 200) { window.location.reload(); } }">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">名称 *</label>
+                <input type="text" id="name" name="name" required
+                       value="{{if .Subscription}}{{.Subscription.Name}}{{end}}"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div>
+                <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">分类 *</label>
+                <div class="flex gap-2">
+                    <div class="flex-1" id="category-select-container">
+                        <select id="category_id" name="category_id" required
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                            <option value="">选择分类</option>
+                            {{range .Categories}}
+                                <option value="{{.ID}}" {{if $.Subscription}}{{if eq $.Subscription.CategoryID .ID}}selected{{end}}{{end}}>{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <button type="button" id="add-category-btn" onclick="showNewCategoryInput()"
+                            class="px-3 py-2 text-sm font-medium text-primary bg-primary/10 border border-primary/30 rounded-lg hover:bg-primary/20 transition-colors duration-150"
+                            title="新增分类">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="new-category-container" class="hidden mt-2">
+                    <div class="flex gap-2">
+                        <input type="text" id="new-category-name" placeholder="新分类名称"
+                               class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                        <button type="button" onclick="createNewCategory()"
+                                class="px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors duration-150">
+                            新增
+                        </button>
+                        <button type="button" onclick="hideNewCategoryInput()"
+                                class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-150">
+                            取消
+                        </button>
+                    </div>
+                    <div id="new-category-error" class="text-sm text-danger mt-1 hidden"></div>
+                </div>
+            </div>
+
+            <div>
+                <label for="cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">费用 *</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2 text-gray-500 dark:text-gray-400">{{.CurrencySymbol}}</span>
+                    <input type="number" id="cost" name="cost" step="0.01" min="0" required
+                           value="{{if .Subscription}}{{.Subscription.Cost}}{{end}}"
+                           class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                </div>
+            </div>
+
+            <div>
+                <label for="original_currency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">货币 *</label>
+                <select id="original_currency" name="original_currency" required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                    {{range .Currencies}}
+                    <option value="{{.Code}}" {{if $.Subscription}}{{if eq $.Subscription.OriginalCurrency .Code}}selected{{end}}{{else}}{{if eq .Code "USD"}}selected{{end}}{{end}}>{{.Symbol}} {{.Code}}</option>
+                    {{end}}
+                </select>
+            </div>
+
+            <div>
+                <label for="schedule" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">周期 *</label>
+                <select id="schedule" name="schedule" required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                    <option value="">选择周期</option>
+                    <option value="Monthly" {{if .Subscription}}{{if eq .Subscription.Schedule "Monthly"}}selected{{end}}{{end}}>每月</option>
+                    <option value="Quarterly" {{if .Subscription}}{{if eq .Subscription.Schedule "Quarterly"}}selected{{end}}{{end}}>每季度</option>
+                    <option value="Annual" {{if .Subscription}}{{if eq .Subscription.Schedule "Annual"}}selected{{end}}{{end}}>每年</option>
+                    <option value="Weekly" {{if .Subscription}}{{if eq .Subscription.Schedule "Weekly"}}selected{{end}}{{end}}>每周</option>
+                    <option value="Daily" {{if .Subscription}}{{if eq .Subscription.Schedule "Daily"}}selected{{end}}{{end}}>每天</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">状态 *</label>
+                <select id="status" name="status" required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                    <option value="">选择状态</option>
+                    <option value="Active" {{if .Subscription}}{{if eq .Subscription.Status "Active"}}selected{{end}}{{end}}>启用中</option>
+                    <option value="Cancelled" {{if .Subscription}}{{if eq .Subscription.Status "Cancelled"}}selected{{end}}{{end}}>已取消</option>
+                    <option value="Paused" {{if .Subscription}}{{if eq .Subscription.Status "Paused"}}selected{{end}}{{end}}>已暂停</option>
+                    <option value="Trial" {{if .Subscription}}{{if eq .Subscription.Status "Trial"}}selected{{end}}{{end}}>试用中</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="payment_method" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">支付方式</label>
+                <input type="text" id="payment_method" name="payment_method"
+                       value="{{if .Subscription}}{{.Subscription.PaymentMethod}}{{end}}"
+                       placeholder="例如：Visa ****1234"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div>
+                <label for="account" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">账户</label>
+                <input type="text" id="account" name="account"
+                       value="{{if .Subscription}}{{.Subscription.Account}}{{end}}"
+                       placeholder="账户邮箱或用户名"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">网站链接</label>
+                <input type="url" id="url" name="url"
+                       value="{{if .Subscription}}{{.Subscription.URL}}{{end}}"
+                       placeholder="https://example.com"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">开始日期</label>
+                <input type="date" id="start_date" name="start_date"
+                       value="{{if .Subscription}}{{if .Subscription.StartDate}}{{.Subscription.StartDate.Format "2006-01-02"}}{{end}}{{end}}"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div>
+                <label for="renewal_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <span class="flex items-center">
+                        下次续费
+                        <div class="relative group ml-1">
+                            <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-10 w-56">
+                                <div class="bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                                    点击保存后会自动按周期更新续费日期
+                                    <div class="absolute left-2 top-full -mt-1">
+                                        <div class="border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                </label>
+                <input type="date" id="renewal_date" name="renewal_date"
+                       value="{{if .Subscription}}{{if .Subscription.RenewalDate}}{{.Subscription.RenewalDate.Format "2006-01-02"}}{{end}}{{end}}"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div>
+                <label for="cancellation_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">取消日期</label>
+                <input type="date" id="cancellation_date" name="cancellation_date"
+                       value="{{if .Subscription}}{{if .Subscription.CancellationDate}}{{.Subscription.CancellationDate.Format "2006-01-02"}}{{end}}{{end}}"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+            </div>
+
+            <div>
+                <label for="usage" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">使用频率</label>
+                <select id="usage" name="usage"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+                    <option value="">选择使用频率</option>
+                    <option value="High" {{if .Subscription}}{{if eq .Subscription.Usage "High"}}selected{{end}}{{end}}>高</option>
+                    <option value="Medium" {{if .Subscription}}{{if eq .Subscription.Usage "Medium"}}selected{{end}}{{end}}>中</option>
+                    <option value="Low" {{if .Subscription}}{{if eq .Subscription.Usage "Low"}}selected{{end}}{{end}}>低</option>
+                    <option value="None" {{if .Subscription}}{{if eq .Subscription.Usage "None"}}selected{{end}}{{end}}>无</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">备注</label>
+                <textarea id="notes" name="notes" rows="3"
+                          placeholder="填写这项订阅的补充说明"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150">{{if .Subscription}}{{.Subscription.Notes}}{{end}}</textarea>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="hidden" name="reminder_enabled" value="false">
+                    <input type="checkbox" name="reminder_enabled" value="true"
+                           {{if .IsEdit}}{{if .Subscription.ReminderEnabled}}checked{{end}}{{else}}checked{{end}}
+                           class="w-4 h-4 text-primary bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary focus:ring-2 transition-colors duration-150">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">为这项订阅发送续费提醒</span>
+                </label>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 ml-7">如果是无需提醒的自动扣费订阅，可以关闭</p>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <button type="button" onclick="document.getElementById('modal').classList.add('hidden')"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-150">
+                取消
+            </button>
+            <button type="submit"
+                    class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-lg hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 transition-colors duration-150">
+                {{if .IsEdit}}更新订阅{{else}}新增订阅{{end}}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function showNewCategoryInput() {
+    document.getElementById('new-category-container').classList.remove('hidden');
+    document.getElementById('add-category-btn').classList.add('hidden');
+    document.getElementById('new-category-name').focus();
+}
+
+function hideNewCategoryInput() {
+    document.getElementById('new-category-container').classList.add('hidden');
+    document.getElementById('add-category-btn').classList.remove('hidden');
+    document.getElementById('new-category-name').value = '';
+    document.getElementById('new-category-error').classList.add('hidden');
+}
+
+let isCreatingCategory = false;
+
+async function createNewCategory() {
+    if (isCreatingCategory) return;
+
+    const nameInput = document.getElementById('new-category-name');
+    const errorDiv = document.getElementById('new-category-error');
+    const addBtn = document.querySelector('#new-category-container button');
+    const name = nameInput.value.trim();
+
+    if (!name) {
+        errorDiv.textContent = '请输入分类名称';
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    isCreatingCategory = true;
+    if (addBtn) addBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/categories', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: name }),
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || '创建分类失败');
+        }
+
+        const newCategory = await response.json();
+
+        if (!newCategory.id || !newCategory.name) {
+            throw new Error('服务器返回的数据无效');
+        }
+
+        const select = document.getElementById('category_id');
+        const option = document.createElement('option');
+        option.value = newCategory.id;
+        option.textContent = newCategory.name;
+        option.selected = true;
+        select.appendChild(option);
+
+        hideNewCategoryInput();
+    } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+    } finally {
+        isCreatingCategory = false;
+        if (addBtn) addBtn.disabled = false;
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.activeElement.id === 'new-category-name') {
+        e.preventDefault();
+        createNewCategory();
+    }
+});
+
+function calculateRenewalDate() {
+    const scheduleSelect = document.getElementById('schedule');
+    const renewalDateInput = document.getElementById('renewal_date');
+
+    if (!scheduleSelect.value) {
+        return;
+    }
+
+    const today = new Date();
+    let renewalDate = new Date(today);
+
+    switch (scheduleSelect.value) {
+        case 'Daily':
+            renewalDate.setDate(today.getDate() + 1);
+            break;
+        case 'Weekly':
+            renewalDate.setDate(today.getDate() + 7);
+            break;
+        case 'Monthly': {
+            const targetMonth = today.getMonth() + 1;
+            const targetYear = today.getFullYear() + (targetMonth > 11 ? 1 : 0);
+            const normalizedMonth = targetMonth % 12;
+            const lastDayOfTargetMonth = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+            const day = Math.min(today.getDate(), lastDayOfTargetMonth);
+            renewalDate = new Date(targetYear, normalizedMonth, day);
+            break;
+        }
+        case 'Quarterly': {
+            const targetMonth = today.getMonth() + 3;
+            const targetYear = today.getFullYear() + Math.floor(targetMonth / 12);
+            const normalizedMonth = targetMonth % 12;
+            const lastDayOfTargetMonth = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+            const day = Math.min(today.getDate(), lastDayOfTargetMonth);
+            renewalDate = new Date(targetYear, normalizedMonth, day);
+            break;
+        }
+        case 'Annual':
+            renewalDate.setFullYear(today.getFullYear() + 1);
+            break;
+        default:
+            return;
+    }
+
+    const year = renewalDate.getFullYear();
+    const month = String(renewalDate.getMonth() + 1).padStart(2, '0');
+    const day = String(renewalDate.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    renewalDateInput.value = formattedDate;
+}
+
+function initRenewalCalculator() {
+    const scheduleSelect = document.getElementById('schedule');
+
+    if (scheduleSelect) {
+        scheduleSelect.addEventListener('change', calculateRenewalDate);
+    }
+}
+
+initRenewalCalculator();
+document.addEventListener('DOMContentLoaded', initRenewalCalculator);
+</script>

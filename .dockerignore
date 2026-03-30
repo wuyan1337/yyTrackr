@@ -1,0 +1,78 @@
+# Git files
+.git/
+.gitignore
+.github/
+
+# Documentation
+*.md
+docs/
+LICENSE
+screenshots/
+
+# Development files
+docker-compose.yml
+.dockerignore
+Dockerfile
+*.log
+.env*
+
+# Build artifacts
+subtrackr
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+dist/
+
+# Test files
+*_test.go
+testdata/
+coverage.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Data directory
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+
+# CI/CD
+.github/
+
+# Legacy files (no longer used)
+node_modules/
+src/
+public/
+package*.json
+tsconfig.json
+tailwind.config*
+postcss.config*
+rebuild.sh
+remove-configs.sh
+
+# Media files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico

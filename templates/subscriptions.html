@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/static/js/theme-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#37889b">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>{{.Title}} - SubTrackr</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/themes.css">
+    <script src="/static/js/themes.js"></script>
+    <script src="/static/js/mobile-menu.js"></script>
+    <script src="/static/js/sorting.js"></script>
+    <script src="/static/js/stickers.js"></script>
+</head>
+<body class="anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+    <div class="flex flex-col min-h-screen">
+        <header class="anime-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 transition-colors duration-200">
+            <div class="flex items-center justify-between max-w-7xl mx-auto">
+                <div class="flex items-center space-x-4 md:space-x-8">
+                    <img src="/static/images/logo.svg" alt="SubTrackr" class="h-8 w-auto">
+                    <nav class="hidden md:flex space-x-1">
+                        <a href="/" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Dashboard</a>
+                        <a href="/subscriptions" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light">Subscriptions</a>
+                        <a href="/analytics" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Analytics</a>
+                        <a href="/calendar" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Calendar</a>
+                    </nav>
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150" aria-label="Open menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="/settings" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-150" aria-label="Settings">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div id="mobile-menu" class="hidden fixed inset-0 z-50 md:hidden">
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeMobileMenu()"></div>
+            <div class="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                        <img src="/static/images/logo.svg" alt="SubTrackr" class="h-8 w-auto">
+                        <button onclick="closeMobileMenu()" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150" aria-label="Close menu">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+                        <a href="/" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Dashboard</a>
+                        <a href="/subscriptions" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light">Subscriptions</a>
+                        <a href="/analytics" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Analytics</a>
+                        <a href="/calendar" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Calendar</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <main class="anime-main flex-1 p-4">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <section class="hero-banner">
+                    <div>
+                        <span class="anime-badge">订阅 / Subscriptions</span>
+                        <h1 class="hero-title mt-4">订阅状态管理 / Subscription Status Management</h1>
+                        <p class="hero-subtitle">查看服务状态、提醒配置与续费节点。</p>
+                        <div class="mt-6 flex flex-wrap gap-3">
+                            <button hx-get="/form/subscription" hx-target="#modal-content" hx-trigger="click" onclick="document.getElementById('modal').classList.remove('hidden')" class="glow-button rounded-xl px-5 py-3 text-sm font-semibold text-white">新增订阅</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="glass-card rounded-[1.75rem] p-6">
+                    <div class="section-heading">
+                        <div>
+                            <div class="section-heading-title">订阅列表</div>
+                            <div class="section-heading-copy">订阅状态与提醒动作。</div>
+                        </div>
+                    </div>
+                    {{template "subscription-list.html" .}}
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="glass-card rounded-[1.5rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4 transition-colors duration-200">
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        function wireSubscriptionMoodCards(root) {
+            const cards = (root || document).querySelectorAll('#subscription-list .subscription-card');
+            cards.forEach((card) => {
+                const status = (card.dataset.status || '').toLowerCase();
+                const renewal = card.dataset.renewal;
+                const usage = (card.dataset.usage || '').toLowerCase();
+                const reminderEnabled = card.dataset.reminderEnabled === 'true';
+                const now = new Date();
+                let daysUntilRenewal = Number.POSITIVE_INFINITY;
+
+                if (renewal) {
+                    const renewalDate = new Date(renewal + 'T00:00:00');
+                    daysUntilRenewal = Math.ceil((renewalDate - now) / 86400000);
+                }
+
+                const statusChip = card.querySelector('[data-role="status-chip"]');
+                const statusText = card.querySelector('.status-chip-text');
+                const statusImg = card.querySelector('.status-chip-still');
+                const reminderTitle = card.querySelector('.reminder-title');
+                const reminderCopy = card.querySelector('.reminder-copy');
+                const reminderStill = card.querySelector('.reminder-still');
+                const reminderAnimated = card.querySelector('.reminder-animated');
+
+                const setStatus = (label, asset) => {
+                    if (statusText) statusText.textContent = label;
+                    if (statusImg) statusImg.src = window.SubTrackrStickers.asset(asset, false);
+                    if (statusChip) statusChip.classList.add('interactive-sticker');
+                };
+
+                if (status === 'cancelled') {
+                    setStatus('已过期', 'chibi-squish-cry');
+                } else if (Number.isFinite(daysUntilRenewal) && daysUntilRenewal >= 0 && daysUntilRenewal <= 3) {
+                    setStatus('即将扣费', 'chibi-squish-cry');
+                } else if (/(unused|idle|pause|rare|没用|少用|停用)/i.test(usage)) {
+                    setStatus('低活跃', 'chibi-peek');
+                } else {
+                    setStatus('正常', 'chibi-red-envelope');
+                }
+
+                if (!reminderEnabled) {
+                    reminderTitle.textContent = '提醒关闭';
+                    reminderCopy.textContent = '当前未发送提醒通知';
+                    reminderStill.src = window.SubTrackrStickers.asset('chibi-peek', false);
+                    reminderAnimated.src = window.SubTrackrStickers.asset('chibi-peek', true);
+                } else if (Number.isFinite(daysUntilRenewal) && daysUntilRenewal >= 0 && daysUntilRenewal <= 3) {
+                    reminderTitle.textContent = '提前提醒';
+                    reminderCopy.textContent = '续费时间临近';
+                    reminderStill.src = window.SubTrackrStickers.asset('chibi-squish-cry', false);
+                    reminderAnimated.src = window.SubTrackrStickers.asset('chibi-squish-cry', true);
+                } else {
+                    reminderTitle.textContent = '提醒已启用';
+                    reminderCopy.textContent = '提醒配置已生效';
+                    reminderStill.src = window.SubTrackrStickers.asset('chibi-cat-ears', false);
+                    reminderAnimated.src = window.SubTrackrStickers.asset('chibi-cat-ears', true);
+                }
+            });
+        }
+
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            wireSubscriptionMoodCards(document);
+        });
+
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.detail && evt.detail.target && evt.detail.target.id === 'subscription-list') {
+                wireSubscriptionMoodCards(evt.detail.target);
+            }
+        });
+    </script>
+</body>
+</html>

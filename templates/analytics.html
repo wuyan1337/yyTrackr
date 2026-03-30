@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/static/js/theme-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#37889b">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>{{.Title}} - SubTrackr</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/themes.css">
+    <script src="/static/js/themes.js"></script>
+    <script src="/static/js/mobile-menu.js"></script>
+    <script src="/static/js/stickers.js"></script>
+</head>
+<body class="anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+    <div class="flex flex-col min-h-screen">
+        <header class="anime-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 transition-colors duration-200">
+            <div class="flex items-center justify-between max-w-7xl mx-auto">
+                <div class="flex items-center space-x-4 md:space-x-8">
+                    <img src="/static/images/logo.svg" alt="SubTrackr" class="h-8 w-auto">
+                    <nav class="hidden md:flex space-x-1">
+                        <a href="/" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Dashboard</a>
+                        <a href="/subscriptions" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Subscriptions</a>
+                        <a href="/analytics" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light">Analytics</a>
+                        <a href="/calendar" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Calendar</a>
+                    </nav>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="/settings" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-150" aria-label="Settings">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="anime-main flex-1 p-4">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <section class="hero-banner">
+                    <div>
+                        <span class="anime-badge">分析 / Analytics</span>
+                        <h1 class="hero-title mt-4">数据分析面板 / Analytics Console</h1>
+                        <p class="hero-subtitle">查看支出结构、状态分布与续费压力。</p>
+                    </div>
+                </section>
+
+                <section class="stats-grid">
+                    <article class="metric-card glass-card interactive-sticker">
+                        <div class="metric-label">本月支出</div>
+                        <div class="metric-value">{{.CurrencySymbol}}{{printf "%.2f" .Stats.TotalMonthlySpend}}</div>
+                        <div class="metric-copy">当前活跃订阅的月度总支出。</div>
+                        <div class="metric-meta justify-end">
+                            <span class="sticker-pair sticker-size-card">
+                                <img class="sticker-still" src="/static/images/chibi/chibi-teary-still.png" alt="">
+                                <img class="sticker-animated" src="/static/images/chibi/chibi-teary.png" alt="">
+                            </span>
+                        </div>
+                    </article>
+                    <article class="metric-card glass-card interactive-sticker">
+                        <div class="metric-label">年度支出</div>
+                        <div class="metric-value">{{.CurrencySymbol}}{{printf "%.2f" .Stats.TotalAnnualSpend}}</div>
+                        <div class="metric-copy">当前活跃订阅的年化支出。</div>
+                        <div class="metric-meta justify-end">
+                            <span class="sticker-pair sticker-size-card">
+                                <img class="sticker-still" src="/static/images/chibi/chibi-coin-still.png" alt="">
+                                <img class="sticker-animated" src="/static/images/chibi/chibi-coin.png" alt="">
+                            </span>
+                        </div>
+                    </article>
+                    <article class="metric-card glass-card interactive-sticker">
+                        <div class="metric-label">累计节省</div>
+                        <div class="metric-value">{{.CurrencySymbol}}{{printf "%.2f" .Stats.TotalSaved}}</div>
+                        <div class="metric-copy">取消或到期后回收的累计成本。</div>
+                        <div class="metric-meta justify-end">
+                            <span class="sticker-pair sticker-size-card">
+                                <img class="sticker-still" src="/static/images/chibi/chibi-red-envelope-still.png" alt="">
+                                <img class="sticker-animated" src="/static/images/chibi/chibi-red-envelope.png" alt="">
+                            </span>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="grid gap-6 lg:grid-cols-2">
+                    <div class="glass-card rounded-[1.75rem] p-6">
+                        <div class="section-heading">
+                            <div>
+                                <div class="section-heading-title">分类支出</div>
+                                <div class="section-heading-copy">分类成本结构。</div>
+                            </div>
+                        </div>
+                        {{if or .HasData .DevPreview}}
+                        <div class="space-y-4">
+                            {{if .HasData}}
+                            {{range $category, $amount := .Stats.CategorySpending}}
+                            <div class="control-panel">
+                                <div class="flex items-center justify-between gap-3">
+                                    <span class="text-sm font-medium text-white">{{$category}}</span>
+                                    <span class="text-sm font-semibold text-pink-100">{{$.CurrencySymbol}}{{printf "%.2f" $amount}}</span>
+                                </div>
+                                <div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
+                                    <div class="h-2 rounded-full bg-gradient-to-r from-pink-400 via-violet-400 to-sky-400" style="width: {{printf "%.0f" (div (mul $amount 100.0) $.Stats.TotalMonthlySpend)}}%;"></div>
+                                </div>
+                            </div>
+                            {{end}}
+                            {{else}}
+                            <div class="control-panel"><div class="h-4 w-36 rounded bg-white/10"></div><div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden"><div class="h-2 w-2/3 rounded-full bg-gradient-to-r from-pink-400/50 to-sky-400/50"></div></div></div>
+                            <div class="control-panel"><div class="h-4 w-28 rounded bg-white/10"></div><div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden"><div class="h-2 w-1/2 rounded-full bg-gradient-to-r from-pink-400/50 to-sky-400/50"></div></div></div>
+                            <div class="control-panel"><div class="h-4 w-32 rounded bg-white/10"></div><div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden"><div class="h-2 w-3/4 rounded-full bg-gradient-to-r from-pink-400/50 to-sky-400/50"></div></div></div>
+                            {{end}}
+                        </div>
+                        {{else}}
+                        <div class="empty-state">
+                            <span class="sticker-pair sticker-size-card interactive-sticker inline-block">
+                                <img class="sticker-still" src="/static/images/chibi/chibi-peek-still.png" alt="">
+                                <img class="sticker-animated" src="/static/images/chibi/chibi-peek.png" alt="">
+                            </span>
+                            <h3>暂无分析数据</h3>
+                            <p>新增订阅后将生成成本结构与状态统计。</p>
+                        </div>
+                        {{end}}
+                    </div>
+
+                    <div class="glass-card rounded-[1.75rem] p-6">
+                        <div class="section-heading">
+                            <div>
+                                <div class="section-heading-title">状态摘要</div>
+                                <div class="section-heading-copy">当前订阅状态分布。</div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="control-panel flex items-center justify-between gap-4 interactive-sticker">
+                                <div><div class="text-sm font-semibold text-white">活跃订阅</div><div class="text-xs text-slate-300">运行中</div></div>
+                                <div class="flex items-center gap-3"><span class="text-xl font-bold text-emerald-300">{{.Stats.ActiveSubscriptions}}</span><span class="sticker-pair sticker-size-sm"><img class="sticker-still" src="/static/images/chibi/chibi-red-envelope-still.png" alt=""><img class="sticker-animated" src="/static/images/chibi/chibi-red-envelope.png" alt=""></span></div>
+                            </div>
+                            <div class="control-panel flex items-center justify-between gap-4 interactive-sticker">
+                                <div><div class="text-sm font-semibold text-white">已取消</div><div class="text-xs text-slate-300">停止服务</div></div>
+                                <div class="flex items-center gap-3"><span class="text-xl font-bold text-rose-300">{{.Stats.CancelledSubscriptions}}</span><span class="sticker-pair sticker-size-sm"><img class="sticker-still" src="/static/images/chibi/chibi-squish-cry-still.png" alt=""><img class="sticker-animated" src="/static/images/chibi/chibi-squish-cry.png" alt=""></span></div>
+                            </div>
+                            <div class="control-panel flex items-center justify-between gap-4 interactive-sticker">
+                                <div><div class="text-sm font-semibold text-white">即将续费</div><div class="text-xs text-slate-300">需要关注</div></div>
+                                <div class="flex items-center gap-3"><span class="text-xl font-bold text-amber-300">{{.Stats.UpcomingRenewals}}</span><span class="sticker-pair sticker-size-sm"><img class="sticker-still" src="/static/images/chibi/chibi-cat-ears-still.png" alt=""><img class="sticker-animated" src="/static/images/chibi/chibi-cat-ears.png" alt=""></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

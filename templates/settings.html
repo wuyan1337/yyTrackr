@@ -1,0 +1,1430 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/static/js/theme-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#37889b">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>{{.Title}} - SubTrackr</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444',
+                    }
+                }
+            }
+        }
+
+    </script>
+    <link rel="stylesheet" href="/static/css/themes.css">
+    <script src="/static/js/themes.js"></script>
+    <script src="/static/js/mobile-menu.js"></script>
+</head>
+<body class="anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="anime-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 transition-colors duration-200">
+            <div class="flex items-center justify-between max-w-7xl mx-auto">
+                <div class="flex items-center space-x-4 md:space-x-8">
+                    <img src="/static/images/logo.svg" alt="SubTrackr" class="h-8 w-auto">
+                    <!-- Desktop Navigation -->
+                    <nav class="hidden md:flex space-x-1">
+                        <a href="/" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v3H8V5z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="/subscriptions" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Subscriptions
+                        </a>
+                        <a href="/analytics" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Analytics
+                        </a>
+                        <a href="/calendar" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Calendar
+                        </a>
+                    </nav>
+                    <!-- Mobile Hamburger Button -->
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150" aria-label="Open menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Desktop Actions -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="/settings" class="text-primary dark:text-primary-light">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </a>
+                </div>
+                <!-- Mobile Actions (Settings only, Add is in menu) -->
+                <div class="md:hidden flex items-center">
+                    <a href="/settings" class="p-2 text-primary dark:text-primary-light">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="hidden fixed inset-0 z-50 md:hidden">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeMobileMenu()"></div>
+            <!-- Menu Panel -->
+            <div class="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out">
+                <div class="flex flex-col h-full">
+                    <!-- Menu Header -->
+                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                        <img src="/static/images/logo.svg" alt="SubTrackr" class="h-8 w-auto">
+                        <button onclick="closeMobileMenu()" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150" aria-label="Close menu">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Menu Items -->
+                    <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+                        <a href="/" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v3H8V5z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="/subscriptions" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Subscriptions
+                        </a>
+                        <a href="/analytics" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Analytics
+                        </a>
+                        <a href="/calendar" onclick="closeMobileMenu()" class="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Calendar
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="anime-main flex-1 p-4">
+            <div class="max-w-7xl mx-auto">
+
+<div class="max-w-4xl mx-auto">
+    <div class="glass-card rounded-[1.75rem] shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">设置</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">管理通知、外观与系统参数</p>
+        </div>
+        
+        <div class="p-6 space-y-8">
+            <div class="hero-banner">
+                <div class="hero-grid">
+                    <div>
+                        <span class="anime-badge">设置 / Settings</span>
+                        <h3 class="hero-title mt-4 text-3xl">系统控制面板 / System Control Panel</h3>
+                        <p class="hero-subtitle">集中管理通知、外观与系统参数。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance -->
+            <div>
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">外观主题</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">统一管理主题、背景与界面展示偏好</p>
+
+                <div class="theme-selector" id="theme-selector">
+                    <div class="theme-option" data-theme="default" onclick="selectTheme('default')">
+                        <div class="theme-name">Default</div>
+                        <div class="theme-description">Clean and professional</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #3b82f6;"></div>
+                            <div class="theme-preview-color" style="background: #64748b;"></div>
+                            <div class="theme-preview-color" style="background: #10b981;"></div>
+                        </div>
+                    </div>
+
+                    <div class="theme-option" data-theme="dark" onclick="selectTheme('dark')">
+                        <div class="theme-name">Dark</div>
+                        <div class="theme-description">Easy on the eyes</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #1f2937;"></div>
+                            <div class="theme-preview-color" style="background: #3b82f6;"></div>
+                            <div class="theme-preview-color" style="background: #10b981;"></div>
+                        </div>
+                    </div>
+
+                    <div class="theme-option" data-theme="dark-classic" onclick="selectTheme('dark-classic')">
+                        <div class="theme-name">Dark Classic</div>
+                        <div class="theme-description">Original dark mode</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #1f2937;"></div>
+                            <div class="theme-preview-color" style="background: #3b82f6;"></div>
+                            <div class="theme-preview-color" style="background: #10b981;"></div>
+                        </div>
+                    </div>
+
+                    <div class="theme-option" data-theme="christmas" onclick="selectTheme('christmas')">
+                        <div class="theme-name">Christmas</div>
+                        <div class="theme-description">Festive and jolly!</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #c41e3a;"></div>
+                            <div class="theme-preview-color" style="background: #165b33;"></div>
+                            <div class="theme-preview-color" style="background: #ffd700;"></div>
+                        </div>
+                    </div>
+
+                    <div class="theme-option" data-theme="midnight" onclick="selectTheme('midnight')">
+                        <div class="theme-name">Midnight</div>
+                        <div class="theme-description">Deep and mysterious</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #0f172a;"></div>
+                            <div class="theme-preview-color" style="background: #8b5cf6;"></div>
+                            <div class="theme-preview-color" style="background: #1e293b;"></div>
+                        </div>
+                    </div>
+
+                    <div class="theme-option" data-theme="gal-violet" onclick="selectTheme('gal-violet')">
+                        <div class="theme-name">Gal Violet</div>
+                        <div class="theme-description">Glass anime dashboard with sakura neon bloom</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #f472b6;"></div>
+                            <div class="theme-preview-color" style="background: #c084fc;"></div>
+                            <div class="theme-preview-color" style="background: #38bdf8;"></div>
+                        </div>
+                    </div>
+
+                    <div class="theme-option" data-theme="ocean" onclick="selectTheme('ocean')">
+                        <div class="theme-name">Ocean</div>
+                        <div class="theme-description">Cool and refreshing</div>
+                        <div class="theme-preview">
+                            <div class="theme-preview-color" style="background: #0891b2;"></div>
+                            <div class="theme-preview-color" style="background: #f0f9ff;"></div>
+                            <div class="theme-preview-color" style="background: #06b6d4;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function selectTheme(themeName) {
+                        // Remove active class from all options
+                        document.querySelectorAll('.theme-option').forEach(opt => {
+                            opt.classList.remove('active');
+                        });
+
+                        // Add active class to selected theme
+                        document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
+
+                        // Apply theme
+                        applyTheme(themeName);
+                    }
+
+                    // Load and mark current theme as active on page load
+                    document.addEventListener('DOMContentLoaded', () => {
+                        fetch('/api/settings/theme')
+                            .then(response => response.json())
+                            .then(data => {
+                                const themeName = data.theme || 'default';
+                                document.querySelector(`[data-theme="${themeName}"]`)?.classList.add('active');
+                            })
+                            .catch(err => console.error('Failed to load theme:', err));
+                    });
+                </script>
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">界面个性化</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">保存背景、贴纸与动效偏好，并立即应用到当前界面。</p>
+                <form id="ui-personalization-form" hx-post="/api/settings/personalization" hx-target="#ui-personalization-message" hx-swap="innerHTML" class="grid gap-4 md:grid-cols-2">
+                    <div class="control-panel">
+                        <label for="custom_background_url" class="block text-sm font-medium text-gray-100 mb-2">自定义背景图链接</label>
+                        <input type="url" id="custom_background_url" name="custom_background_url" value="{{if .UIPersonalization}}{{.UIPersonalization.CustomBackgroundURL}}{{end}}" placeholder="https://example.com/your-background.png" class="login-field">
+                        <p class="text-xs text-slate-300 mt-2">可作为页面背景层叠加显示，所有主题均可生效。</p>
+                    </div>
+                    <div class="control-panel space-y-3">
+                        <label class="flex items-center justify-between gap-4 cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-white">启用 Chibi 贴纸</div>
+                                <div class="text-xs text-slate-300">全局显示或隐藏贴纸层</div>
+                            </div>
+                            <input type="checkbox" id="enable_chibi_stickers" name="enable_chibi_stickers" class="sr-only peer" {{if or (not .UIPersonalization) .UIPersonalization.EnableChibiStickers}}checked{{end}}>
+                            <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-white/15 transition peer-checked:bg-primary/70"><span id="enable_chibi_stickers_knob" class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform {{if or (not .UIPersonalization) .UIPersonalization.EnableChibiStickers}}translate-x-6{{else}}translate-x-1{{end}}"></span></span>
+                        </label>
+                        <label class="flex items-center justify-between gap-4 cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-white">减少动态效果</div>
+                                <div class="text-xs text-slate-300">降低悬浮、微光和贴纸切换动效</div>
+                            </div>
+                            <input type="checkbox" id="reduce_motion" name="reduce_motion" class="sr-only peer" {{if and .UIPersonalization .UIPersonalization.ReduceMotion}}checked{{end}}>
+                            <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-white/15 transition peer-checked:bg-primary/70"><span id="reduce_motion_knob" class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform {{if and .UIPersonalization .UIPersonalization.ReduceMotion}}translate-x-6{{else}}translate-x-1{{end}}"></span></span>
+                        </label>
+                        <label class="flex items-center justify-between gap-4 cursor-pointer">
+                            <div>
+                                <div class="text-sm font-semibold text-white">仅显示静态贴纸</div>
+                                <div class="text-xs text-slate-300">保留贴纸展示，但关闭悬浮时的动态切换</div>
+                            </div>
+                            <input type="checkbox" id="static_stickers_only" name="static_stickers_only" class="sr-only peer" {{if and .UIPersonalization .UIPersonalization.StaticStickersOnly}}checked{{end}}>
+                            <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-white/15 transition peer-checked:bg-primary/70"><span id="static_stickers_only_knob" class="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform {{if and .UIPersonalization .UIPersonalization.StaticStickersOnly}}translate-x-6{{else}}translate-x-1{{end}}"></span></span>
+                        </label>
+                    </div>
+                    <div id="ui-personalization-message" class="md:col-span-2"></div>
+                    <div class="md:col-span-2 flex justify-end">
+                        <button type="submit" class="glow-button text-white px-4 py-2 rounded-xl text-sm font-medium">
+                            保存界面偏好
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Export Data -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">导出数据</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">下载订阅数据，支持多种导出格式</p>
+                <div class="flex space-x-3">
+                    <a href="/api/export/csv" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 inline-block transition-colors duration-150">
+                        导出为 CSV
+                    </a>
+                    <a href="/api/export/json" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 inline-block transition-colors duration-150">
+                        导出为 JSON
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Base URL -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">基础地址</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">设置当前实例的外部访问地址，用于 iCal 订阅链接和密码重置邮件。留空时将根据请求头自动识别。</p>
+                <form hx-post="/api/settings/base-url" hx-swap="none" class="flex items-center space-x-2">
+                    <input type="url" name="base_url" id="base-url-input"
+                        value="{{.BaseURL}}"
+                        placeholder="https://subtrackr.example.com"
+                        class="flex-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
+                    <button type="submit"
+                        class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors duration-150">
+                        保存
+                    </button>
+                </form>
+                <script>
+                    document.body.addEventListener('htmx:afterRequest', function(event) {
+                        if (event.detail && event.detail.pathInfo && event.detail.pathInfo.requestPath === '/api/settings/base-url' && event.detail.successful) {
+                            var btn = event.detail.elt.querySelector('button[type="submit"]');
+                            if (btn) {
+                                var original = btn.textContent;
+                                btn.textContent = '已保存';
+                                setTimeout(function() { btn.textContent = original; }, 2000);
+                            }
+                        }
+                    });
+                </script>
+            </div>
+
+            <!-- Calendar Subscription -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">日历订阅</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">启用可订阅的 iCal 链接，让日历应用轮询最新续费信息</p>
+
+                <div class="space-y-4">
+                    <!-- Toggle -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">iCal 订阅</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">允许日历应用订阅你的续费日期</p>
+                        </div>
+                        <button id="ical-toggle-btn"
+                            hx-post="/api/settings/ical/toggle"
+                            hx-swap="none"
+                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 {{if .ICalSubscriptionEnabled}}bg-primary{{else}}bg-gray-200 dark:bg-gray-600{{end}}"
+                            role="switch"
+                            aria-checked="{{if .ICalSubscriptionEnabled}}true{{else}}false{{end}}">
+                            <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{if .ICalSubscriptionEnabled}}translate-x-5{{else}}translate-x-0{{end}}"></span>
+                        </button>
+                    </div>
+
+                    <!-- URL Display (shown when enabled) -->
+                    <div id="ical-url-section" class="{{if not .ICalSubscriptionEnabled}}hidden{{end}}">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="ical-url-input" readonly
+                                value="{{.ICalSubscriptionURL}}"
+                                class="flex-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                            <button onclick="copyICalURL()" type="button"
+                                class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors duration-150">
+                                复制
+                            </button>
+                            <button
+                                hx-post="/api/settings/ical/regenerate"
+                                hx-swap="none"
+                                hx-confirm="确定要重新生成吗？旧订阅链接会失效，日历应用需要重新添加新链接。"
+                                type="button"
+                                class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-150">
+                                重新生成
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">将此链接作为“订阅日历”添加到你的日历应用中，例如 Google Calendar、Apple Calendar、Outlook 等。</p>
+                    </div>
+                </div>
+
+                <script>
+                    document.body.addEventListener('htmx:afterRequest', function(event) {
+                        if (event.detail && event.detail.pathInfo && event.detail.pathInfo.requestPath === '/api/settings/ical/toggle') {
+                            try {
+                                var data = JSON.parse(event.detail.xhr.responseText);
+                                var btn = document.getElementById('ical-toggle-btn');
+                                var section = document.getElementById('ical-url-section');
+                                var input = document.getElementById('ical-url-input');
+                                var knob = btn.querySelector('span');
+
+                                if (data.enabled) {
+                                    btn.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+                                    btn.classList.add('bg-primary');
+                                    btn.setAttribute('aria-checked', 'true');
+                                    knob.classList.remove('translate-x-0');
+                                    knob.classList.add('translate-x-5');
+                                    section.classList.remove('hidden');
+                                    if (data.url) input.value = data.url;
+                                } else {
+                                    btn.classList.remove('bg-primary');
+                                    btn.classList.add('bg-gray-200', 'dark:bg-gray-600');
+                                    btn.setAttribute('aria-checked', 'false');
+                                    knob.classList.remove('translate-x-5');
+                                    knob.classList.add('translate-x-0');
+                                    section.classList.add('hidden');
+                                }
+                            } catch(e) {}
+                        }
+                        if (event.detail && event.detail.pathInfo && event.detail.pathInfo.requestPath === '/api/settings/ical/regenerate') {
+                            try {
+                                var data = JSON.parse(event.detail.xhr.responseText);
+                                if (data.url) {
+                                    document.getElementById('ical-url-input').value = data.url;
+                                }
+                            } catch(e) {}
+                        }
+                    });
+
+                    function copyICalURL() {
+                        var input = document.getElementById('ical-url-input');
+                        navigator.clipboard.writeText(input.value).then(function() {
+                            var btn = input.nextElementSibling;
+                            var original = btn.textContent;
+                                    btn.textContent = '已复制';
+                            setTimeout(function() { btn.textContent = original; }, 2000);
+                        });
+                    }
+                </script>
+            </div>
+
+            <!-- Data Management -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">数据管理</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div>
+                            <h4 class="text-sm font-medium text-yellow-900">备份数据</h4>
+                            <p class="text-sm text-yellow-800">创建当前全部订阅数据的备份</p>
+                        </div>
+                        <a href="/api/backup" class="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 inline-block">
+                            创建备份
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div>
+                            <h4 class="text-sm font-medium text-red-800">清空全部数据</h4>
+                            <p class="text-sm text-red-700">永久删除所有订阅数据</p>
+                        </div>
+                        <button 
+                            hx-delete="/api/clear-all"
+                            hx-confirm="确定要删除全部订阅数据吗？此操作无法撤销。"
+                            hx-target="body"
+                            hx-swap="none"
+                            class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+                            清空数据
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Email Notifications -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">邮件通知</h3>
+                
+                <!-- SMTP Settings -->
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4 transition-colors duration-200">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">SMTP 配置</h4>
+                    <form id="smtp-form" hx-post="/api/settings/smtp" hx-trigger="submit" hx-target="#smtp-message" hx-swap="innerHTML">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="smtp_host" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">SMTP 主机</label>
+                                <input type="text" id="smtp_host" name="smtp_host" placeholder="smtp.gmail.com" value="{{if .SMTPConfig}}{{.SMTPConfig.Host}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <div>
+                                <label for="smtp_port" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">SMTP 端口</label>
+                                <input type="number" id="smtp_port" name="smtp_port" placeholder="587" value="{{if .SMTPConfig}}{{.SMTPConfig.Port}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <div>
+                                <label for="smtp_username" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">用户名</label>
+                                <input type="text" id="smtp_username" name="smtp_username" placeholder="username or email" value="{{if .SMTPConfig}}{{.SMTPConfig.Username}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <div>
+                                <label for="smtp_password" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">密码</label>
+                                <input type="password" id="smtp_password" name="smtp_password" placeholder="输入密码"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">刷新后不会回显已保存密码；如果只是修改其他字段，可以留空保存，系统会继续使用原密码。</p>
+                            </div>
+                            <div>
+                                <label for="smtp_from" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">发件邮箱</label>
+                                <input type="email" id="smtp_from" name="smtp_from" placeholder="noreply@example.com" value="{{if .SMTPConfig}}{{.SMTPConfig.From}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <div>
+                                <label for="smtp_from_name" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">发件名称</label>
+                                <input type="text" id="smtp_from_name" name="smtp_from_name" placeholder="SubTrackr" value="{{if .SMTPConfig}}{{.SMTPConfig.FromName}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="smtp_to" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">收件邮箱（通知接收人）</label>
+                                <input type="email" id="smtp_to" name="smtp_to" placeholder="your-email@example.com" value="{{if .SMTPConfig}}{{.SMTPConfig.To}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">通知邮件会发送到这个地址</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div id="smtp-message"></div>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <div class="flex space-x-2">
+                                <button type="button"
+                                        id="test-smtp-btn"
+                                        hx-post="/api/settings/smtp/test"
+                                        hx-include="#smtp-form"
+                                        hx-target="#smtp-message"
+                                        hx-indicator="#smtp-spinner"
+                                        class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-500 flex items-center transition-colors duration-150">
+                                    <svg id="smtp-spinner" class="htmx-indicator animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    测试连接
+                                </button>
+                                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
+                                    保存 SMTP 设置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">续费提醒</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">在订阅续费前接收通知</p>
+                        </div>
+                        <button hx-post="/api/settings/notifications/renewal" 
+                                hx-trigger="click"
+                                hx-swap="none"
+                                id="renewal-toggle"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full {{if .RenewalReminders}}bg-primary{{else}}bg-gray-200{{end}} transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition-transform {{if .RenewalReminders}}translate-x-6{{else}}translate-x-1{{end}}"></span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">高价提醒</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">新增高费用订阅时发出提醒</p>
+                        </div>
+                        <button hx-post="/api/settings/notifications/highcost"
+                                hx-trigger="click"
+                                hx-swap="none"
+                                id="highcost-toggle" 
+                                class="relative inline-flex h-6 w-11 items-center rounded-full {{if .HighCostAlerts}}bg-primary{{else}}bg-gray-200{{end}} transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition-transform {{if .HighCostAlerts}}translate-x-6{{else}}translate-x-1{{end}}"></span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">高价阈值</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">用于高价提醒的月度费用阈值（单位 {{.CurrencySymbol}}）</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{.CurrencySymbol}}</span>
+                            <input type="number" 
+                                   name="high_cost_threshold"
+                                   value="{{printf "%.2f" .HighCostThreshold}}"
+                                   min="0"
+                                   max="10000"
+                                   step="0.01"
+                                   hx-post="/api/settings/notifications/threshold"
+                                   hx-trigger="change"
+                                   hx-swap="none"
+                                   class="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">提前提醒天数</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">距离续费还有多少天时发送提醒</p>
+                        </div>
+                        <input type="number"
+                               name="reminder_days"
+                               value="{{.ReminderDays}}"
+                               min="1"
+                               max="30"
+                               hx-post="/api/settings/notifications/days"
+                               hx-trigger="change"
+                               hx-swap="none"
+                               class="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">取消提醒</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">在订阅结束或取消前接收通知</p>
+                        </div>
+                        <button hx-post="/api/settings/notifications/cancellation"
+                                hx-trigger="click"
+                                hx-swap="none"
+                                id="cancellation-toggle"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full {{if .CancellationReminders}}bg-primary{{else}}bg-gray-200{{end}} transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition-transform {{if .CancellationReminders}}translate-x-6{{else}}translate-x-1{{end}}"></span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">取消前提醒天数</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">距离取消还有多少天时发送提醒</p>
+                        </div>
+                        <input type="number"
+                               name="cancellation_reminder_days"
+                               value="{{.CancellationReminderDays}}"
+                               min="1"
+                               max="30"
+                               hx-post="/api/settings/notifications/cancellation_days"
+                               hx-trigger="change"
+                               hx-swap="none"
+                               class="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pushover Notifications -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">Pushover 通知</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">通过 Pushover 在移动设备上接收推送通知</p>
+                
+                <!-- Pushover Settings -->
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4 transition-colors duration-200">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Pushover 配置</h4>
+                    <form id="pushover-form" hx-post="/api/settings/pushover" hx-trigger="submit" hx-target="#pushover-message" hx-swap="innerHTML">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="pushover_user_key" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">用户 Key</label>
+                                <input type="text" id="pushover_user_key" name="pushover_user_key" placeholder="填写你的 Pushover 用户 Key" value="{{if .PushoverConfig}}{{.PushoverConfig.UserKey}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">在 <a href="https://pushover.net/" target="_blank" class="text-primary hover:underline">pushover.net</a> 获取你的用户 Key</p>
+                            </div>
+                            <div>
+                                <label for="pushover_app_token" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">应用 Token</label>
+                                <input type="text" id="pushover_app_token" name="pushover_app_token" placeholder="填写你的应用 Token" value="{{if .PushoverConfig}}{{.PushoverConfig.AppToken}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">在 <a href="https://pushover.net/apps/build" target="_blank" class="text-primary hover:underline">pushover.net/apps</a> 创建应用</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div id="pushover-message"></div>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <div class="flex space-x-2">
+                                <button type="button"
+                                        id="test-pushover-btn"
+                                        hx-post="/api/settings/pushover/test"
+                                        hx-include="#pushover-form"
+                                        hx-target="#pushover-message"
+                                        hx-indicator="#pushover-spinner"
+                                        class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-500 flex items-center transition-colors duration-150">
+                                    <svg id="pushover-spinner" class="htmx-indicator animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    测试连接
+                                </button>
+                                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
+                                    保存 Pushover 设置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Telegram 通知 -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">Telegram 通知</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">使用 BotFather 生成的机器人 Token，将提醒直接发送到 Telegram 聊天。</p>
+
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4 transition-colors duration-200">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Telegram 机器人配置</h4>
+                    <form id="telegram-form" hx-post="/api/settings/telegram" hx-trigger="submit" hx-target="#telegram-message" hx-swap="innerHTML">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="telegram_bot_token" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">机器人 Token</label>
+                                <input type="text" id="telegram_bot_token" name="telegram_bot_token" placeholder="123456789:AA..."
+                                       value="{{if .TelegramConfig}}{{.TelegramConfig.BotToken}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">在 BotFather 中创建机器人后，将 API Token 粘贴到这里。</p>
+                            </div>
+                            <div>
+                                <label for="telegram_chat_id" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">聊天 ID</label>
+                                <input type="text" id="telegram_chat_id" name="telegram_chat_id" placeholder="e.g. 123456789 or -1001234567890"
+                                       value="{{if .TelegramConfig}}{{.TelegramConfig.ChatID}}{{end}}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">私聊请先给机器人发送一条消息；群组或频道请先添加机器人，再填写目标聊天 ID。</p>
+                            </div>
+                        </div>
+                        <div class="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3 text-xs text-blue-800 dark:text-blue-200 mb-4">
+                            测试消息会直接发送到这里配置的聊天目标，方便立即验证 Token 和聊天 ID 是否正确。
+                        </div>
+                        <div class="mb-4">
+                            <div id="telegram-message"></div>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <div class="flex space-x-2">
+                                <button type="button"
+                                        id="test-telegram-btn"
+                                        hx-post="/api/settings/telegram/test"
+                                        hx-include="#telegram-form"
+                                        hx-target="#telegram-message"
+                                        hx-indicator="#telegram-spinner"
+                                        class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-500 flex items-center transition-colors duration-150">
+                                    <svg id="telegram-spinner" class="htmx-indicator animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    测试 Telegram
+                                </button>
+                                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
+                                    保存 Telegram 设置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Webhook Notifications -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">Webhook 通知</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">将通知发送到任意 Webhook 端点（如 Slack、Discord、n8n、Home Assistant 等）</p>
+
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 transition-colors duration-200">
+                    <form id="webhook-form" hx-post="/api/settings/webhook" hx-trigger="submit" hx-target="#webhook-message" hx-swap="innerHTML">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="webhook_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Webhook URL</label>
+                                <input type="url" id="webhook_url" name="webhook_url"
+                                       value="{{if .WebhookConfig}}{{.WebhookConfig.URL}}{{end}}"
+                                       placeholder="https://example.com/webhook"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150">
+                            </div>
+                            <div>
+                                <label for="webhook_headers" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Custom Headers <span class="text-gray-400 font-normal">(optional, one per line)</span></label>
+                                <textarea id="webhook_headers" name="webhook_headers" rows="3"
+                                          placeholder="Authorization: Bearer your-token-here&#10;X-Custom-Header: value"
+                                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-primary focus:border-primary font-mono transition-colors duration-150">{{if .WebhookConfig}}{{range $key, $value := .WebhookConfig.Headers}}{{$key}}: {{$value}}
+{{end}}{{end}}</textarea>
+                            </div>
+                            <div id="webhook-message"></div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="button"
+                                        hx-post="/api/settings/webhook/test"
+                                        hx-include="#webhook-form"
+                                        hx-target="#webhook-message"
+                                        hx-indicator="#webhook-spinner"
+                                        class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-500 flex items-center transition-colors duration-150">
+                                    <svg id="webhook-spinner" class="htmx-indicator animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    测试连接
+                                </button>
+                                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
+                                    保存 Webhook 设置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">账户访问</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">当前站点采用强制登录模式。未登录用户无法访问任何页面，不同账户之间的数据互相隔离。</p>
+
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 transition-colors duration-200">
+                    <div class="space-y-3">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">访问规则</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">首次使用需先注册账户，之后通过登录进入系统。每个账户只可查看和管理自己的订阅、分类、设置与 API Key。</p>
+                        <div class="inline-flex items-center px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-sm font-medium">
+                            已启用强制登录与账户隔离
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <!-- Currency Settings -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">货币</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">选择用于显示订阅费用的默认货币</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {{range .Currencies}}
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio"
+                               name="currency"
+                               value="{{.Code}}"
+                               {{if eq .Code $.Currency}}checked{{end}}
+                               hx-post="/api/settings/currency"
+                               hx-trigger="change"
+                               hx-vals='{"currency": "{{.Code}}"}'
+                               class="mr-2 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{.Symbol}} {{.Code}} ({{.Name}})</span>
+                    </label>
+                    {{end}}
+                </div>
+
+                <div id="currency-message" class="mt-2"></div>
+            </div>
+
+            <!-- Date Format Settings -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">日期格式</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">选择整个应用内日期的显示方式</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio"
+                               name="date_format"
+                               value="MM/DD/YYYY"
+                               {{if or (eq .DateFormat "MM/DD/YYYY") (eq .DateFormat "")}}checked{{end}}
+                               hx-post="/api/settings/date-format"
+                               hx-trigger="change"
+                               hx-vals='{"date_format": "MM/DD/YYYY"}'
+                               class="mr-2 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">MM/DD/YYYY (02/24/2026)</span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio"
+                               name="date_format"
+                               value="DD/MM/YYYY"
+                               {{if eq .DateFormat "DD/MM/YYYY"}}checked{{end}}
+                               hx-post="/api/settings/date-format"
+                               hx-trigger="change"
+                               hx-vals='{"date_format": "DD/MM/YYYY"}'
+                               class="mr-2 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">DD/MM/YYYY (24/02/2026)</span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio"
+                               name="date_format"
+                               value="YYYY-MM-DD"
+                               {{if eq .DateFormat "YYYY-MM-DD"}}checked{{end}}
+                               hx-post="/api/settings/date-format"
+                               hx-trigger="change"
+                               hx-vals='{"date_format": "YYYY-MM-DD"}'
+                               class="mr-2 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">YYYY-MM-DD (2026-02-24)</span>
+                    </label>
+                </div>
+
+                <div id="date-format-message" class="mt-2"></div>
+            </div>
+
+            <!-- Category Management -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">分类管理</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">管理订阅分类</p>
+                <div id="categories-list" class="space-y-2 mb-4"></div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 transition-colors duration-200">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">新增分类</h4>
+                    <form id="add-category-form">
+                        <div class="flex items-end space-x-3">
+                            <div class="flex-1">
+                                <label for="category_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">分类名称</label>
+                                <input type="text" id="category_name" name="name" required placeholder="例如：流媒体" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">新增分类</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- API Keys -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">API 密钥</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">创建 API 密钥，供外部应用访问 SubTrackr</p>
+                
+                <!-- API Key List -->
+                <div id="api-keys-list" class="space-y-2 mb-4">
+                    <div hx-get="/api/settings/apikeys" hx-trigger="load" hx-swap="innerHTML">
+                        <div class="text-center py-4 text-gray-500">
+                            正在加载 API 密钥...
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Create New API Key -->
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 transition-colors duration-200">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">创建新的 API 密钥</h4>
+                    <form hx-post="/api/settings/apikeys" hx-target="#api-keys-list" hx-swap="innerHTML">
+                        <div class="flex items-end space-x-3">
+                            <div class="flex-1">
+                                <label for="api_key_name" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">密钥名称</label>
+                                <input type="text" 
+                                       id="api_key_name" 
+                                       name="name" 
+                                       required
+                                        placeholder="例如：Home Assistant 集成"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-colors duration-150">
+                            </div>
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
+                                生成 API 密钥
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- API Documentation Link -->
+                <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg transition-colors duration-200">
+                    <p class="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>API 文档：</strong>所有请求都需要在请求头中带上 <code class="bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded text-blue-800 dark:text-blue-200">X-API-Key</code>。
+                        <a href="#api-docs" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline ml-1">查看完整 API 文档</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- About -->
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">关于 SubTrackr</h3>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 transition-colors duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Version</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-300">{{.Version}}</span>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Build</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-300">Go + HTMX</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Database</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-300">SQLite</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- API Documentation -->
+<div id="api-docs" class="mt-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-colors duration-200">
+        <div class="p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">API 文档</h2>
+            
+            <div class="space-y-6">
+                <!-- Authentication -->
+                <div>
+                    <h3 class="text-md font-medium text-gray-900 dark:text-white mb-2">认证方式</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">所有 API 请求都需要使用 API 密钥认证，请在请求头中附带密钥：</p>
+                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 font-mono text-sm transition-colors duration-200">
+                        <div class="mb-2">
+                            <span class="text-gray-500 dark:text-gray-400"># Authorization 请求头（推荐）</span><br>
+                            <span class="text-gray-900 dark:text-gray-100">Authorization: Bearer sk_your_api_key_here</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 dark:text-gray-400"># X-API-Key 请求头（备选）</span><br>
+                            <span class="text-gray-900 dark:text-gray-100">X-API-Key: sk_your_api_key_here</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endpoints -->
+                <div>
+                    <h3 class="text-md font-medium text-gray-900 dark:text-white mb-3">API 接口</h3>
+                    
+                    <!-- Subscriptions -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">订阅接口</h4>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-hidden transition-colors duration-200">
+                            <table class="min-w-full">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">方法</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">接口</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">GET</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/subscriptions</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">获取全部订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded text-xs font-medium">POST</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/subscriptions</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">创建新订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">GET</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/subscriptions/:id</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">获取订阅详情</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 rounded text-xs font-medium">PUT</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/subscriptions/:id</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">更新订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded text-xs font-medium">DELETE</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/subscriptions/:id</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">删除订阅</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Statistics & Export -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">统计与导出</h4>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-hidden transition-colors duration-200">
+                            <table class="min-w-full">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">方法</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">接口</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">GET</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/stats</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">获取订阅统计</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">GET</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/export/csv</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">将订阅导出为 CSV</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">GET</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/api/v1/export/json</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">将订阅导出为 JSON</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- iCal Subscription -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">iCal 订阅</h4>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-hidden transition-colors duration-200">
+                            <table class="min-w-full">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">方法</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">接口</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">GET</span></td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">/ical/:token</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">订阅 iCal 日历源（公开链接，基于 Token 验证）</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- MCP Server -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">MCP 服务器（AI 集成）</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">SubTrackr 内置了 Model Context Protocol（MCP）服务器，允许 AI 助手通过自然语言读取和管理订阅。</p>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-hidden transition-colors duration-200 mb-3">
+                            <table class="min-w-full">
+                                <thead class="bg-gray-100 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">工具</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200">说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">list_subscriptions</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">列出全部订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">get_subscription</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">按 ID 获取订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">create_subscription</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">创建新订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">update_subscription</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">更新已有订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">delete_subscription</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">删除订阅</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100">get_stats</td>
+                                        <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">获取订阅统计</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5 class="text-xs font-medium text-gray-700 dark:text-gray-200 mb-2">配置示例</h5>
+                        <p class="text-xs text-gray-600 dark:text-gray-300 mb-2">将以下内容加入你的 Claude Desktop 或 Claude Code MCP 配置：</p>
+                        <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+<pre>{
+  "mcpServers": {
+    "subtrackr": {
+      "command": "subtrackr-mcp",
+      "args": [],
+      "env": {
+        "DATABASE_PATH": "/path/to/subtrackr.db"
+      }
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example Requests -->
+                <div>
+                    <h3 class="text-md font-medium text-gray-900 dark:text-white mb-3">请求示例</h3>
+                    
+                    <div class="space-y-4">
+                        <!-- List Subscriptions -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">获取订阅列表</h4>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                                <div class="text-green-400">curl -H "Authorization: Bearer sk_your_api_key_here" \</div>
+                                <div class="ml-4">http://localhost:8080/api/v1/subscriptions</div>
+                            </div>
+                        </div>
+
+                        <!-- Create Subscription -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">创建订阅</h4>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                                <div class="text-green-400">curl -X POST \</div>
+                                <div class="ml-4">-H "Authorization: Bearer sk_your_api_key_here" \</div>
+                                <div class="ml-4">-H "Content-Type: application/json" \</div>
+                                <div class="ml-4">-d '{</div>
+                                <div class="ml-8">"name": "Netflix",</div>
+                                <div class="ml-8">"cost": 15.99,</div>
+                                <div class="ml-8">"schedule": "Monthly",</div>
+                                <div class="ml-8">"status": "Active",</div>
+                                <div class="ml-8">"category_id": 1</div>
+                                <div class="ml-4">}' \</div>
+                                <div class="ml-4">http://localhost:8080/api/v1/subscriptions</div>
+                            </div>
+                        </div>
+
+                        <!-- Get Statistics -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">获取统计信息</h4>
+                            <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                                <div class="text-green-400">curl -H "Authorization: Bearer sk_your_api_key_here" \</div>
+                                <div class="ml-4">http://localhost:8080/api/v1/stats</div>
+                            </div>
+                            <div class="mt-2">
+                                <h5 class="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">返回示例：</h5>
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 font-mono text-xs transition-colors duration-200">
+<pre>{
+  "total_count": 15,
+  "active_count": 12,
+  "total_cost": 245.67,
+  "categories": {
+    "Entertainment": 45.99,
+    "Productivity": 89.00,
+    "Storage": 29.99
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Resources -->
+                <div>
+                    <h3 class="text-md font-medium text-gray-900 dark:text-white mb-2">补充资源</h3>
+                    <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 transition-colors duration-200">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="text-sm text-blue-800 dark:text-blue-200">
+                                <p>更完整的 API 文档和示例请查看项目仓库中的 README 文件。</p>
+                                <p class="mt-1">测试脚本 <code class="bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded text-blue-800 dark:text-blue-200">test-api.sh</code> 提供了可直接参考的交互示例。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4 transition-colors duration-200">
+            <div id="modal-content">
+                <!-- Dynamic content loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu functionality is handled by /static/js/mobile-menu.js
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+
+        // Handle toggle button responses
+        function updateToggle(response, toggleId) {
+            const toggle = document.getElementById(toggleId);
+            if (!toggle) return;
+            const span = toggle.querySelector('span');
+            if (!span) return;
+            
+            if (response.enabled) {
+                toggle.classList.remove('bg-gray-200');
+                toggle.classList.add('bg-primary');
+                span.classList.remove('translate-x-1');
+                span.classList.add('translate-x-6');
+            } else {
+                toggle.classList.remove('bg-primary');
+                toggle.classList.add('bg-gray-200');
+                span.classList.remove('translate-x-6');
+                span.classList.add('translate-x-1');
+            }
+        }
+
+        function getRequestPath(detail) {
+            return detail && detail.pathInfo && detail.pathInfo.requestPath ? detail.pathInfo.requestPath : '';
+        }
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            const path = getRequestPath(evt.detail);
+            
+            // Only parse JSON for notification endpoints
+            if (path && path.includes('/api/settings/notifications/')) {
+                try {
+                    const response = JSON.parse(evt.detail.xhr.responseText);
+                    
+                    if (path === '/api/settings/notifications/renewal') {
+                        updateToggle(response, 'renewal-toggle');
+                    }
+                    
+                    if (path === '/api/settings/notifications/highcost') {
+                        updateToggle(response, 'highcost-toggle');
+                    }
+
+                    if (path === '/api/settings/notifications/cancellation') {
+                        updateToggle(response, 'cancellation-toggle');
+                    }
+                } catch (e) {
+                    // Response is not JSON, ignore
+                }
+            }
+        });
+
+        function readUIPersonalizationForm() {
+            return {
+                custom_background_url: document.getElementById('custom_background_url')?.value || '',
+                enable_chibi_stickers: !!document.getElementById('enable_chibi_stickers')?.checked,
+                reduce_motion: !!document.getElementById('reduce_motion')?.checked,
+                static_stickers_only: !!document.getElementById('static_stickers_only')?.checked
+            };
+        }
+
+        function previewUIPersonalization() {
+            if (typeof applyUIPersonalization === 'function') {
+                applyUIPersonalization(readUIPersonalizationForm());
+            }
+            [
+                'enable_chibi_stickers',
+                'reduce_motion',
+                'static_stickers_only'
+            ].forEach(function(id) {
+                const input = document.getElementById(id);
+                const knob = document.getElementById(id + '_knob');
+                if (!input || !knob) return;
+                knob.classList.toggle('translate-x-6', input.checked);
+                knob.classList.toggle('translate-x-1', !input.checked);
+            });
+        }
+
+        ['custom_background_url', 'enable_chibi_stickers', 'reduce_motion', 'static_stickers_only'].forEach(function(id) {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('change', previewUIPersonalization);
+                input.addEventListener('input', previewUIPersonalization);
+            }
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            const path = getRequestPath(evt.detail);
+            if (path === '/api/settings/personalization' && evt.detail.successful) {
+                previewUIPersonalization();
+            }
+        });
+    </script>
+    <script>
+// --- Category Management Vanilla JS ---
+function renderCategories(categories) {
+    const list = document.getElementById('categories-list');
+    if (!categories.length) {
+        list.innerHTML = '<div class="text-center py-4 text-gray-500">No categories found.</div>';
+        return;
+    }
+    list.innerHTML = categories.map(cat => `
+        <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+            <div class="flex-1">
+                <span class="category-name text-sm font-medium text-gray-900" id="category-name-${cat.id}">${cat.name}</span>
+                <form id="edit-category-form-${cat.id}" class="hidden inline">
+                    <input type="text" name="name" value="${cat.name}" class="px-2 py-1 border border-gray-300 rounded text-sm">
+                    <button type="submit" class="text-primary text-sm font-medium ml-2">保存</button>
+                    <button type="button" onclick="cancelEdit(${cat.id})" class="text-gray-500 text-sm ml-1">取消</button>
+                </form>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="startEdit(${cat.id})" class="text-blue-600 hover:text-blue-800 text-sm font-medium">编辑</button>
+                <button onclick="deleteCategory(${cat.id})" class="text-red-600 hover:text-red-800 text-sm font-medium">删除</button>
+            </div>
+        </div>
+    `).join('');
+    // Attach edit form listeners
+    categories.forEach(cat => {
+        const form = document.getElementById(`edit-category-form-${cat.id}`);
+        if (form) {
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                const name = form.elements['name'].value;
+                fetch(`/api/categories/${cat.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                }).then(r => r.json()).then(loadCategories);
+            };
+        }
+    });
+}
+function loadCategories() {
+    fetch('/api/categories').then(r => r.json()).then(renderCategories);
+}
+function addCategory(e) {
+    e.preventDefault();
+    const name = document.getElementById('category_name').value;
+    fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+    }).then(r => r.json()).then(() => {
+        document.getElementById('add-category-form').reset();
+        loadCategories();
+    });
+}
+function deleteCategory(id) {
+    if (!confirm('确定要删除这个分类吗？')) return;
+    fetch(`/api/categories/${id}`, { method: 'DELETE' })
+        .then(async response => {
+            if (!response.ok) {
+                const data = await response.json();
+                alert(data.error || "删除分类失败。");
+            } else {
+                loadCategories();
+            }
+        });
+}
+function startEdit(id) {
+    document.getElementById(`category-name-${id}`).style.display = 'none';
+    document.getElementById(`edit-category-form-${id}`).classList.remove('hidden');
+}
+function cancelEdit(id) {
+    document.getElementById(`edit-category-form-${id}`).classList.add('hidden');
+    document.getElementById(`category-name-${id}`).style.display = '';
+}
+document.getElementById('add-category-form').onsubmit = addCategory;
+window.loadCategories = loadCategories;
+document.addEventListener('DOMContentLoaded', loadCategories);
+
+</script>
+</body>
+</html>

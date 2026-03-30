@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <script src="/static/js/theme-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#37889b">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>注册 - SubTrackr</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/themes.css">
+    <script src="/static/js/auth-background.js" defer></script>
+</head>
+<body class="bg-gray-50">
+    <div class="login-shell auth-stage">
+        <section class="login-art p-8 lg:p-12 flex flex-col justify-between auth-stage__media">
+            <div class="auth-stage__slides" data-auth-slideshow>
+                <div class="auth-stage__slide is-active" style="background-image:url('/static/images/wp/atri-my-dear-moments-anime-review-a-submerged-tale-of-human-android-connection-3317236.webp')"></div>
+                <div class="auth-stage__slide" style="background-image:url('/static/images/wp/atri_pv2screenshot.webp')"></div>
+                <div class="auth-stage__slide" style="background-image:url('/static/images/wp/unnamed.png')"></div>
+                <div class="auth-stage__slide" style="background-image:url('/static/images/wp/unnamed.webp')"></div>
+            </div>
+            <div class="auth-stage__overlay"></div>
+            <div class="relative z-10">
+                <span class="anime-badge">账户注册</span>
+                <h1 class="hero-title mt-5 max-w-xl">创建新账户</h1>
+                <p class="hero-subtitle">注册后即可进入系统。每个账户都拥有独立的订阅、分类、通知与个性化设置。</p>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <div class="login-card glass-card">
+                <div class="text-center mb-8">
+                    <img src="/static/images/logo.svg" alt="SubTrackr" class="h-12 w-auto mx-auto mb-5">
+                    <h2 class="text-3xl font-bold text-white">创建账户</h2>
+                    <p class="mt-2 text-sm text-slate-300">设置用户名和密码后即可开始使用。</p>
+                </div>
+
+                <form hx-post="/api/auth/register" hx-target="#register-error" hx-swap="innerHTML">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-slate-200 mb-2">用户名</label>
+                            <input type="text" id="username" name="username" required autofocus class="login-field">
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-slate-200 mb-2">密码</label>
+                            <input type="password" id="password" name="password" minlength="8" required class="login-field">
+                        </div>
+
+                        <div>
+                            <label for="confirm_password" class="block text-sm font-medium text-slate-200 mb-2">确认密码</label>
+                            <input type="password" id="confirm_password" name="confirm_password" minlength="8" required class="login-field">
+                        </div>
+
+                        <label class="flex items-center gap-3 text-sm text-slate-300">
+                            <input type="checkbox" id="remember_me" name="remember_me" class="h-4 w-4 rounded border-white/20 bg-white/10 text-pink-400 focus:ring-pink-400">
+                            <span>注册后保持登录</span>
+                        </label>
+
+                        <div id="register-error" class="min-h-[20px]">
+                            {{if .Error}}<div class="bg-red-50 border border-red-200 rounded-lg p-3"><p class="text-sm text-red-700">{{.Error}}</p></div>{{end}}
+                        </div>
+
+                        <button type="submit" class="glow-button w-full rounded-xl px-4 py-3 font-semibold text-white">
+                            创建账户并进入系统
+                        </button>
+
+                        <div class="text-center text-sm text-slate-300">
+                            已有账户？
+                            <a href="/login" class="text-pink-200 hover:text-white">返回登录</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+# Build outputs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+main
+server
+subtrackr
+yyTrackr
+dist/
+build/
+
+# Go workspace
+go.work
+
+# Runtime data
+data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# Logs and temp files
+*.log
+server.log
+tmp/
+temp/
+
+# Package manager / tooling
+node_modules/
+.playwright-mcp/
+
+# Editor and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local project notes
+plans/
+product-spec.md
+RELEASE_NOTES*.md
+CleanShot*.png
+
+# Beads local state
+.beads/beads.db
+.beads/config.yaml
+.beads/metadata.json
+.beads/README.md
+.beads/.gitignore
+.beads/export-state/
+
+# Docker local volume
+docker-data/
