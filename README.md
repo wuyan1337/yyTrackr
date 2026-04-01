@@ -1,100 +1,52 @@
 # yyTrackr
 
-`yyTrackr` is a self-hosted subscription tracker built on the original `bscott/subtrackr` stack and kept intentionally simple:
+`yyTrackr` 是一个自部署的订阅追踪工具，当前版本基于 Go + Gin + SQLite + HTMX，适合个人长期记录和管理各类订阅项目。
 
-- Go + Gin
-- SQLite
-- HTMX templates
-- Tailwind CSS
+当前项目特点：
 
-This fork adds a polished anime / gal-style dashboard, mandatory account login, Telegram / Webhook / Email notifications, multi-user data isolation, and a bundled visual preset so the app looks complete on first launch.
+- Go + Gin 后端
+- SQLite 本地数据存储
+- HTMX + 服务端模板页面
+- 支持账号注册、登录和多用户隔离
+- 支持 Dashboard / Subscriptions / Analytics / Calendar / Settings
+- 支持 Email / Telegram / Pushover / Webhook 通知
+- 支持 iCal 导出、CSV / JSON 导出
+- 适合跑在单机 VPS 或个人服务器上
 
-![yyTrackr Dashboard](dashboard-screenshot.png)
-![yyTrackr Calendar](calendar-screenshot.png)
-![yyTrackr Mobile](mobile-screenshot.png)
+## 当前运行方式
 
-## Features
-
-- Multi-user account system with registration and login
-- Dashboard, subscriptions, analytics, calendar, and settings pages
-- Glassmorphism `Gal Violet` theme with bundled chibi stickers
-- Email, Telegram, Pushover, and Webhook notifications
-- iCal subscription feed for renewal dates
-- CSV / JSON / iCal export
-- Per-subscription original currency tracking
-- Dashboard and analytics totals converted to your chosen display currency
-- Automatic exchange rates via `Frankfurter` without an API key
-- Local development preview mode
-
-## Screens and Assets
-
-This repository intentionally includes the bundled UI assets used by the current theme:
-
-- chibi sticker assets in [`web/static/images/chibi`](web/static/images/chibi)
-- wallpaper assets in [`web/static/images/wp`](web/static/images/wp)
-
-That means a fresh clone can run with the same visual presentation shown in the screenshots.
-
-## Quick Start
-
-### Requirements
-
-- Go `1.21+`
-
-### Run locally
-
-```bash
-go mod tidy
-go run .
-```
-
-Then open:
+默认运行端口：
 
 ```text
-http://localhost:8080
+8080
 ```
 
-If your module download is slow, you can temporarily set a Go proxy:
+本地开发：
 
 ```bash
-export GOPROXY=https://proxy.golang.org,direct
 go mod tidy
 go run .
 ```
 
-PowerShell:
+生产环境建议：
 
-```powershell
-$env:GOPROXY="https://proxy.golang.org,direct"
-go mod tidy
-go run .
-```
+- 使用 systemd 保活
+- 使用反向代理提供 HTTPS
+- 定期备份 `data/` 目录
 
-`yyTrackr` automatically creates:
+## 配置
 
-- `./data/`
-- `./data/subtrackr.db`
+常用环境变量：
 
-## Default Runtime Behavior
-
-- Default port: `8080`
-- Startup log: `Server running at http://localhost:8080`
-- Authentication is required for the web UI
-- Each account has isolated subscriptions, categories, settings, and API keys
-
-## Configuration
-
-Environment variables are optional unless you want to customize behavior.
-
-| Variable | Description | Default |
+| 变量 | 说明 | 默认值 |
 | --- | --- | --- |
-| `PORT` | Server port | `8080` |
-| `DATABASE_PATH` | SQLite database file path | `./data/subtrackr.db` |
-| `DB_PATH` | Alias for `DATABASE_PATH` | `./data/subtrackr.db` |
-| `GIN_MODE` | Gin mode | `debug` |
-| `DEV_PREVIEW` | Show styled empty-state preview blocks | `false` |
+| `PORT` | 服务端口 | `8080` |
+| `DATABASE_PATH` | SQLite 数据库路径 | `./data/subtrackr.db` |
+| `DB_PATH` | `DATABASE_PATH` 的别名 | `./data/subtrackr.db` |
+| `GIN_MODE` | Gin 模式 | `debug` |
+| `DEV_PREVIEW` | 是否启用开发预览 | `false` |
 
-### Example
+示例：
 
 ```bash
 PORT=8080
@@ -103,95 +55,31 @@ GIN_MODE=release
 DEV_PREVIEW=false
 ```
 
-PowerShell:
-
-```powershell
-$env:PORT="8080"
-$env:DATABASE_PATH="./data/subtrackr.db"
-$env:GIN_MODE="release"
-$env:DEV_PREVIEW="false"
-go run .
-```
-
-## Notifications
-
-Notification channels are configured in the Settings page:
-
-- SMTP Email
-- Telegram Bot
-- Pushover
-- Generic Webhook
-
-### Renewal reminder timing
-
-Current scheduler behavior:
-
-- one catch-up scan about `15 seconds` after startup
-- then a daily scan at `10:00` local time on the machine running the server
-
-If a subscription renews tomorrow and the reminder lead time is set to `1` day, the reminder is sent today during the `10:00` scan.
-
-## Currency Behavior
-
-- In `Subscriptions`, each item keeps its original currency
-- In `Dashboard` and `Analytics`, totals are converted into the display currency selected in Settings
-- Exchange rates come from `Frankfurter`
-- No API key is required
-
-## Development Notes
-
-### DEV preview mode
-
-Enable placeholder UI blocks without injecting fake subscription records:
-
-```bash
-DEV_PREVIEW=true
-go run .
-```
-
-### SQLite driver
-
-This fork uses a pure-Go SQLite driver so local preview works without CGO.
-
-## Production Notes
-
-- Run behind a reverse proxy if you need HTTPS and domain routing
-- Set the machine timezone correctly because reminder jobs use the server's local time
-- Make regular backups of the `data/` directory
-
-## Open Source Publishing Checklist
-
-Before pushing your own public repo, do not commit:
-
-- `data/`
-- `*.db`
-- real SMTP passwords
-- Telegram bot tokens
-- Discord / webhook URLs
-- generated API keys
-- local logs
-
-The included `.gitignore` is already set up to ignore the main runtime and secret-prone local files.
-
-## Project Structure
+## 目录结构
 
 ```text
 .
-├─ cmd/
 ├─ internal/
 ├─ templates/
 ├─ web/
-│  └─ static/
-│     ├─ css/
-│     ├─ images/
-│     │  ├─ chibi/
-│     │  └─ wp/
-│     └─ js/
 ├─ data/
 ├─ main.go
+├─ go.mod
 └─ README.md
 ```
 
-## License
+## 生产部署建议
 
-This fork continues from the original SubTrackr project. Review the upstream license and keep attribution consistent with the original repository when publishing your fork.
+- 先编译：
+
+```bash
+go build -o ./bin/subtrackr .
+```
+
+- 再通过 systemd 启动
+- 反向代理指向本地 `127.0.0.1:8080`
+- 如果用 HTTPS，推荐由 Caddy / Nginx 处理证书
+
+## 说明
+
+本仓库是当前可运行版本的代码仓库，README 以当前实际可部署状态为准，不附带演示截图。
