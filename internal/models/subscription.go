@@ -100,7 +100,12 @@ func (s *Subscription) AfterFind(tx *gorm.DB) error {
 		if s.RenewalDate.Before(now) || s.RenewalDate.Equal(now) {
 			// Renewal date has passed, calculate the next one
 			oldRenewalDate := s.RenewalDate
-			s.calculateNextRenewalDate()
+			if s.StartDate != nil {
+				s.calculateNextRenewalDate()
+			} else {
+				// No start date - advance from the old renewal date to preserve cycle alignment
+				s.advanceRenewalFromDate(*oldRenewalDate)
+			}
 
 			// Only update if the date actually changed to avoid unnecessary writes
 			if s.RenewalDate != nil && !s.RenewalDate.Equal(*oldRenewalDate) {
@@ -157,11 +162,134 @@ func (s *Subscription) BeforeUpdate(tx *gorm.DB) error {
 		now := time.Now()
 		if s.RenewalDate.Before(now) || s.RenewalDate.Equal(now) {
 			// Renewal date has passed, calculate the next one
-			s.calculateNextRenewalDate()
+			if s.StartDate != nil {
+				s.calculateNextRenewalDate()
+			} else {
+				// No start date - advance from the old renewal date to preserve cycle alignment
+				s.advanceRenewalFromDate(*s.RenewalDate)
+			}
 		}
 	}
 
 	return nil
+}
+
+
+// advanceRenewalFromDate advances the renewal date from a given base date by one or more
+// billing periods until it lands in the future. Used when StartDate is nil to preserve
+// cycle alignment instead of drifting to time.Now().
+func (s *Subscription) advanceRenewalFromDate(baseDate time.Time) {
+	now := time.Now()
+
+	switch s.DateCalculationVersion {
+	case 2:
+		start := carbon.CreateFromStdTime(baseDate)
+		current := start.Copy()
+		switch s.Schedule {
+		case "Monthly":
+			for current.Lte(carbon.Now()) {
+				current = current.AddMonthsNoOverflow(1)
+			}
+		case "Quarterly":
+			for current.Lte(carbon.Now()) {
+				current = current.AddMonthsNoOverflow(3)
+			}
+		case "Annual":
+			for current.Lte(carbon.Now()) {
+				current = current.AddYearsNoOverflow(1)
+			}
+		case "Weekly":
+			for current.Lte(carbon.Now()) {
+				current = current.AddWeeks(1)
+			}
+		case "Daily":
+			for current.Lte(carbon.Now()) {
+				current = current.AddDays(1)
+			}
+		default:
+			for current.Lte(carbon.Now()) {
+				current = current.AddMonthsNoOverflow(1)
+			}
+		}
+		renewalDate := current.StdTime()
+		s.RenewalDate = &renewalDate
+
+	default:
+		// V1: use the same month-end-safe logic as calculateNextRenewalDateFromStartDate
+		startDay := baseDate.Day()
+		startYear := baseDate.Year()
+		startMonth := int(baseDate.Month())
+
+		var renewalDate time.Time
+		switch s.Schedule {
+		case "Annual":
+			years := 1
+			for {
+				renewalDate = baseDate.AddDate(years, 0, 0)
+				if renewalDate.After(now) {
+					break
+				}
+				years++
+			}
+		case "Weekly":
+			weeks := 1
+			for {
+				renewalDate = baseDate.AddDate(0, 0, weeks*7)
+				if renewalDate.After(now) {
+					break
+				}
+				weeks++
+			}
+		case "Daily":
+			days := 1
+			for {
+				renewalDate = baseDate.AddDate(0, 0, days)
+				if renewalDate.After(now) {
+					break
+				}
+				days++
+			}
+		case "Quarterly":
+			quarters := 1
+			for {
+				totalMonths := startMonth + (quarters * 3) - 1
+				targetYear := startYear + totalMonths/12
+				targetMonth := time.Month((totalMonths % 12) + 1)
+				lastDay := time.Date(targetYear, targetMonth+1, 0, 0, 0, 0, 0, baseDate.Location()).Day()
+				targetDay := startDay
+				if startDay > lastDay {
+					targetDay = lastDay
+				}
+				renewalDate = time.Date(targetYear, targetMonth, targetDay,
+					baseDate.Hour(), baseDate.Minute(), baseDate.Second(),
+					baseDate.Nanosecond(), baseDate.Location())
+				if renewalDate.After(now) {
+					break
+				}
+				quarters++
+			}
+		default: // Monthly
+			months := 1
+			for {
+				totalMonths := startMonth + months - 1
+				targetYear := startYear + totalMonths/12
+				targetMonth := time.Month((totalMonths % 12) + 1)
+				lastDay := time.Date(targetYear, targetMonth+1, 0, 0, 0, 0, 0, baseDate.Location()).Day()
+				targetDay := startDay
+				if startDay > lastDay {
+					targetDay = lastDay
+				}
+				renewalDate = time.Date(targetYear, targetMonth, targetDay,
+					baseDate.Hour(), baseDate.Minute(), baseDate.Second(),
+					baseDate.Nanosecond(), baseDate.Location())
+				if renewalDate.After(now) {
+					break
+				}
+				months++
+			}
+		}
+		s.RenewalDate = &renewalDate
+	}
 }
 
 // calculateNextRenewalDate calculates the next renewal date based on schedule and version.
