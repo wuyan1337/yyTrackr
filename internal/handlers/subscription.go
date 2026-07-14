@@ -274,6 +274,19 @@ func parseDatePtr(dateStr string) *time.Time {
 	return nil
 }
 
+func parseBoolFormDefault(c *gin.Context, key string, defaultValue bool) bool {
+	values, ok := c.GetPostFormArray(key)
+	if !ok || len(values) == 0 {
+		return defaultValue
+	}
+	for _, value := range values {
+		if value == "true" || value == "on" || value == "1" {
+			return true
+		}
+	}
+	return false
+}
+
 // Dashboard renders the main dashboard page
 func (h *SubscriptionHandler) Dashboard(c *gin.Context) {
 	subscriptionService := h.scopedSubscriptionService(c)
@@ -718,13 +731,10 @@ func (h *SubscriptionHandler) CreateSubscription(c *gin.Context) {
 	subscription.Notes = c.PostForm("notes")
 	subscription.Usage = c.PostForm("usage")
 
-	// Default reminders to enabled unless explicitly set to false
-	reminderVal := c.PostForm("reminder_enabled")
-	if reminderVal == "" {
-		subscription.ReminderEnabled = true
-	} else {
-		subscription.ReminderEnabled = reminderVal == "true"
-	}
+	// Default reminders to enabled unless explicitly set to false.
+	// The form submits both a hidden fallback (false) and the checkbox value (true)
+	// when checked, so inspect all submitted values instead of PostForm's first value.
+	subscription.ReminderEnabled = parseBoolFormDefault(c, "reminder_enabled", true)
 
 	// Parse cost
 	if costStr := c.PostForm("cost"); costStr != "" {
@@ -879,8 +889,8 @@ func (h *SubscriptionHandler) UpdateSubscription(c *gin.Context) {
 	if val, ok := c.GetPostForm("usage"); ok {
 		existing.Usage = val
 	}
-	if val, ok := c.GetPostForm("reminder_enabled"); ok {
-		existing.ReminderEnabled = val == "true"
+	if _, ok := c.GetPostForm("reminder_enabled"); ok {
+		existing.ReminderEnabled = parseBoolFormDefault(c, "reminder_enabled", existing.ReminderEnabled)
 	}
 	if val, ok := c.GetPostForm("cost"); ok && val != "" {
 		if cost, err := strconv.ParseFloat(val, 64); err == nil {
