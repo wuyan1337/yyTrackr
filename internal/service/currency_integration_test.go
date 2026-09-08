@@ -1,7 +1,6 @@
 package service
 
 import (
-	"os"
 	"subtrackr/internal/models"
 	"subtrackr/internal/repository"
 	"testing"
@@ -42,34 +41,25 @@ func TestCurrencyService_Integration_IsEnabled(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "Disabled without API key",
+			name:     "Enabled without API key",
 			apiKey:   "",
-			expected: false,
+			expected: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Set or unset the environment variable
-			if tt.apiKey != "" {
-				os.Setenv("FIXER_API_KEY", tt.apiKey)
-			} else {
-				os.Unsetenv("FIXER_API_KEY")
-			}
+			t.Setenv("FIXER_API_KEY", tt.apiKey)
 
 			service := NewCurrencyService(repo)
 			assert.Equal(t, tt.expected, service.IsEnabled())
 		})
 	}
 
-	// Clean up
-	os.Unsetenv("FIXER_API_KEY")
 }
 
 func TestCurrencyService_Integration_ConvertAmount_SameCurrency(t *testing.T) {
-	db := setupTestDB(t)
-	repo := repository.NewExchangeRateRepository(db)
-	service := NewCurrencyService(repo)
+	service, _ := mockCurrency(t, 503, `{}`)
 
 	// Test same currency conversion (should return same amount)
 	amount := 100.0
@@ -80,12 +70,8 @@ func TestCurrencyService_Integration_ConvertAmount_SameCurrency(t *testing.T) {
 }
 
 func TestCurrencyService_Integration_ConvertAmount_WithCachedRate(t *testing.T) {
-	os.Setenv("FIXER_API_KEY", "test-key")
-	defer os.Unsetenv("FIXER_API_KEY")
 
-	db := setupTestDB(t)
-	repo := repository.NewExchangeRateRepository(db)
-	service := NewCurrencyService(repo)
+	service, _ := mockCurrency(t, 503, `{}`)
 
 	// Create a cached rate
 	cachedRate := &models.ExchangeRate{
@@ -95,7 +81,7 @@ func TestCurrencyService_Integration_ConvertAmount_WithCachedRate(t *testing.T) 
 		Date:         time.Now(),
 	}
 
-	err := repo.SaveRates([]models.ExchangeRate{*cachedRate})
+	err := service.repo.SaveRates([]models.ExchangeRate{*cachedRate})
 	assert.NoError(t, err)
 
 	amount := 100.0
@@ -106,27 +92,19 @@ func TestCurrencyService_Integration_ConvertAmount_WithCachedRate(t *testing.T) 
 }
 
 func TestCurrencyService_Integration_ConvertAmount_NoAPIKey(t *testing.T) {
-	os.Unsetenv("FIXER_API_KEY")
-
-	db := setupTestDB(t)
-	repo := repository.NewExchangeRateRepository(db)
-	service := NewCurrencyService(repo)
+	t.Setenv("FIXER_API_KEY", "")
+	service, _ := mockCurrency(t, 200, `[{"date":"2026-01-01","base":"USD","quote":"EUR","rate":0.85}]`)
 
 	amount := 100.0
 	result, err := service.ConvertAmount(amount, "USD", "EUR")
 
-	assert.Error(t, err)
-	assert.Equal(t, 0.0, result)
-	assert.Contains(t, err.Error(), "currency conversion not available")
+	assert.NoError(t, err)
+	assert.Equal(t, 85.0, result)
 }
 
 func TestCurrencyService_Integration_ConvertAmount_InvalidAmount(t *testing.T) {
-	os.Setenv("FIXER_API_KEY", "test-key")
-	defer os.Unsetenv("FIXER_API_KEY")
 
-	db := setupTestDB(t)
-	repo := repository.NewExchangeRateRepository(db)
-	service := NewCurrencyService(repo)
+	service, _ := mockCurrency(t, 503, `{}`)
 
 	// Pre-cache a rate to avoid API calls
 	cachedRate := models.ExchangeRate{
@@ -135,7 +113,7 @@ func TestCurrencyService_Integration_ConvertAmount_InvalidAmount(t *testing.T) {
 		Rate:         0.85,
 		Date:         time.Now(),
 	}
-	repo.SaveRates([]models.ExchangeRate{cachedRate})
+	service.repo.SaveRates([]models.ExchangeRate{cachedRate})
 
 	tests := []struct {
 		name     string
@@ -156,9 +134,7 @@ func TestCurrencyService_Integration_ConvertAmount_InvalidAmount(t *testing.T) {
 }
 
 func TestCurrencyService_Integration_SupportedCurrencies(t *testing.T) {
-	db := setupTestDB(t)
-	repo := repository.NewExchangeRateRepository(db)
-	service := NewCurrencyService(repo)
+	service, _ := mockCurrency(t, 503, `{}`)
 
 	// Test that common currencies are supported
 	supportedCurrencies := []string{
@@ -177,9 +153,7 @@ func TestCurrencyService_Integration_SupportedCurrencies(t *testing.T) {
 }
 
 func TestCurrencyService_Integration_BDTCurrency(t *testing.T) {
-	db := setupTestDB(t)
-	repo := repository.NewExchangeRateRepository(db)
-	service := NewCurrencyService(repo)
+	service, _ := mockCurrency(t, 503, `{}`)
 
 	// Test BDT currency support
 	t.Run("BDT same currency conversion", func(t *testing.T) {

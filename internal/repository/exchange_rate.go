@@ -29,7 +29,7 @@ func (r *ExchangeRateRepository) GetRate(baseCurrency, targetCurrency string) (*
 
 	var rate models.ExchangeRate
 	err := r.db.Where("base_currency = ? AND currency = ?", baseCurrency, targetCurrency).
-		Order("date DESC").
+		Order("created_at DESC, id DESC").
 		First(&rate).Error
 
 	if err != nil {
@@ -64,5 +64,5 @@ func (r *ExchangeRateRepository) GetLatestRates(baseCurrency string) ([]models.E
 // DeleteStaleRates removes exchange rates older than the specified duration
 func (r *ExchangeRateRepository) DeleteStaleRates(olderThan time.Duration) error {
 	cutoff := time.Now().Add(-olderThan)
-	return r.db.Where("date < ?", cutoff).Delete(&models.ExchangeRate{}).Error
+	return r.db.Where("created_at < ?", cutoff).Delete(&models.ExchangeRate{}).Error
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -87,6 +88,7 @@ func supportedCurrencySymbols() string {
 type CurrencyService struct {
 	repo    *repository.ExchangeRateRepository
 	baseURL string
+	client  *http.Client
 }
 
 type frankfurterRate struct {
@@ -108,12 +110,18 @@ func (s *CurrencyService) IsEnabled() bool {
 }
 
 func (s *CurrencyService) GetExchangeRate(fromCurrency, toCurrency string) (float64, error) {
+	for _, code := range []string{fromCurrency, toCurrency} {
+		if _, ok := currencyInfoMap[code]; !ok {
+			return 0, fmt.Errorf("unsupported currency: %s", code)
+		}
+	}
 	if fromCurrency == toCurrency {
 		return 1.0, nil
 	}
 
 	rate, err := s.repo.GetRate(fromCurrency, toCurrency)
-	if err == nil && !rate.IsStale() {
+	// Cache freshness is fetch time, not the provider's business-day date.
+	if err == nil && rate.Rate > 0 && !math.IsNaN(rate.Rate) && !math.IsInf(rate.Rate, 0) && time.Since(rate.CreatedAt) >= 0 && time.Since(rate.CreatedAt) < 24*time.Hour {
 		return rate.Rate, nil
 	}
 
@@ -139,13 +147,9 @@ func (s *CurrencyService) fetchAndCacheRate(baseCurrency, targetCurrency string)
 		return 0, fmt.Errorf("unauthorized API host: %s", parsedURL.Host)
 	}
 
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				MinVersion: tls.VersionTLS12,
-			},
-		},
+	client := s.client
+	if client == nil {
+		client = &http.Client{Timeout: 10 * time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}}}
 	}
 
 	resp, err := client.Get(endpoint)
@@ -167,7 +171,7 @@ func (s *CurrencyService) fetchAndCacheRate(baseCurrency, targetCurrency string)
 	}
 
 	item := payload[0]
-	if item.Rate == 0 {
+	if item.Rate <= 0 || math.IsNaN(item.Rate) || math.IsInf(item.Rate, 0) || item.Base != baseCurrency || item.Quote != targetCurrency {
 		return 0, fmt.Errorf("exchange rate for %s to %s not available", baseCurrency, targetCurrency)
 	}
 
@@ -204,13 +208,9 @@ func (s *CurrencyService) RefreshRates() error {
 		return fmt.Errorf("unauthorized API host: %s", parsedURL.Host)
 	}
 
-	client := &http.Client{
-		Timeout: 15 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				MinVersion: tls.VersionTLS12,
-			},
-		},
+	client := s.client
+	if client == nil {
+		client = &http.Client{Timeout: 15 * time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}}}
 	}
 
 	resp, err := client.Get(endpoint)
@@ -238,9 +238,10 @@ func (s *CurrencyService) RefreshRates() error {
 	})
 
 	for _, item := range payload {
-		if item.Rate == 0 || item.Quote == "" {
+		if item.Rate <= 0 || math.IsNaN(item.Rate) || math.IsInf(item.Rate, 0) || item.Quote == "" || item.Base != baseCurrency {
 			continue
 		}
+		rateDate = time.Now().UTC()
 		if item.Date != "" {
 			if parsedDate, err := time.Parse("2006-01-02", item.Date); err == nil {
 				rateDate = parsedDate
@@ -254,6 +255,9 @@ func (s *CurrencyService) RefreshRates() error {
 		})
 	}
 
+	if len(ratesToSave) == 1 {
+		return fmt.Errorf("no valid exchange rates available")
+	}
 	if err := s.repo.SaveRates(ratesToSave); err != nil {
 		return fmt.Errorf("failed to cache exchange rates: %w", err)
 	}
