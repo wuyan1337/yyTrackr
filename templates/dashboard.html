@@ -27,10 +27,11 @@
         }
     </script>
     <link rel="stylesheet" href="/static/css/themes.css">
+    <link rel="stylesheet" href="/static/css/app-ui.css?v=20260908-1">
     <script src="/static/js/themes.js"></script>
     <script src="/static/js/mobile-menu.js"></script>
 </head>
-<body class="anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+<body class="app-ui anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
     <div class="flex flex-col min-h-screen">
         <header class="anime-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 transition-colors duration-200">
             <div class="flex items-center justify-between max-w-7xl mx-auto">
@@ -42,6 +43,7 @@
                         <a href="/analytics" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Analytics</a>
                         <a href="/calendar" class="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">Calendar</a>
                     </nav>
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">☰</button>
                 </div>
                 <div class="hidden md:flex items-center space-x-3">
                     <a href="/settings" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-150" aria-label="Settings">
@@ -51,6 +53,17 @@
             </div>
         </header>
 
+        <div id="mobile-menu" class="hidden fixed inset-0 z-50 md:hidden">
+            <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeMobileMenu()"></div>
+            <nav class="fixed left-0 top-0 bottom-0 w-64 bg-gray-800 p-4 flex flex-col gap-3" aria-label="Mobile navigation">
+                <button onclick="closeMobileMenu()" class="p-3 text-left" aria-label="Close menu">✕ Close</button>
+                <a class="p-3" href="/" aria-current="page" onclick="closeMobileMenu()">Dashboard</a>
+                <a class="p-3" href="/subscriptions" onclick="closeMobileMenu()">Subscriptions</a>
+                <a class="p-3" href="/analytics" onclick="closeMobileMenu()">Analytics</a>
+                <a class="p-3" href="/calendar" onclick="closeMobileMenu()">Calendar</a>
+                <a class="p-3" href="/settings" onclick="closeMobileMenu()">Settings</a>
+            </nav>
+        </div>
         <main class="anime-main flex-1 p-4">
             <div class="max-w-7xl mx-auto space-y-8">
                 <section class="hero-banner">

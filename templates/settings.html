@@ -28,10 +28,11 @@
 
     </script>
     <link rel="stylesheet" href="/static/css/themes.css">
+    <link rel="stylesheet" href="/static/css/app-ui.css?v=20260908-1">
     <script src="/static/js/themes.js"></script>
     <script src="/static/js/mobile-menu.js"></script>
 </head>
-<body class="anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+<body class="app-ui anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
     <div class="flex flex-col min-h-screen">
         <!-- Header -->
         <header class="anime-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 transition-colors duration-200">
@@ -164,109 +165,7 @@
                 </div>
             </div>
 
-            <!-- Appearance -->
-            <div>
-                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">外观主题</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">统一管理主题、背景与界面展示偏好</p>
 
-                <div class="theme-selector" id="theme-selector">
-                    <div class="theme-option" data-theme="default" onclick="selectTheme('default')">
-                        <div class="theme-name">Default</div>
-                        <div class="theme-description">Clean and professional</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #3b82f6;"></div>
-                            <div class="theme-preview-color" style="background: #64748b;"></div>
-                            <div class="theme-preview-color" style="background: #10b981;"></div>
-                        </div>
-                    </div>
-
-                    <div class="theme-option" data-theme="dark" onclick="selectTheme('dark')">
-                        <div class="theme-name">Dark</div>
-                        <div class="theme-description">Easy on the eyes</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #1f2937;"></div>
-                            <div class="theme-preview-color" style="background: #3b82f6;"></div>
-                            <div class="theme-preview-color" style="background: #10b981;"></div>
-                        </div>
-                    </div>
-
-                    <div class="theme-option" data-theme="dark-classic" onclick="selectTheme('dark-classic')">
-                        <div class="theme-name">Dark Classic</div>
-                        <div class="theme-description">Original dark mode</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #1f2937;"></div>
-                            <div class="theme-preview-color" style="background: #3b82f6;"></div>
-                            <div class="theme-preview-color" style="background: #10b981;"></div>
-                        </div>
-                    </div>
-
-                    <div class="theme-option" data-theme="christmas" onclick="selectTheme('christmas')">
-                        <div class="theme-name">Christmas</div>
-                        <div class="theme-description">Festive and jolly!</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #c41e3a;"></div>
-                            <div class="theme-preview-color" style="background: #165b33;"></div>
-                            <div class="theme-preview-color" style="background: #ffd700;"></div>
-                        </div>
-                    </div>
-
-                    <div class="theme-option" data-theme="midnight" onclick="selectTheme('midnight')">
-                        <div class="theme-name">Midnight</div>
-                        <div class="theme-description">Deep and mysterious</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #0f172a;"></div>
-                            <div class="theme-preview-color" style="background: #8b5cf6;"></div>
-                            <div class="theme-preview-color" style="background: #1e293b;"></div>
-                        </div>
-                    </div>
-
-                    <div class="theme-option" data-theme="gal-violet" onclick="selectTheme('gal-violet')">
-                        <div class="theme-name">Gal Violet</div>
-                        <div class="theme-description">Glass anime dashboard with sakura neon bloom</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #f472b6;"></div>
-                            <div class="theme-preview-color" style="background: #c084fc;"></div>
-                            <div class="theme-preview-color" style="background: #38bdf8;"></div>
-                        </div>
-                    </div>
-
-                    <div class="theme-option" data-theme="ocean" onclick="selectTheme('ocean')">
-                        <div class="theme-name">Ocean</div>
-                        <div class="theme-description">Cool and refreshing</div>
-                        <div class="theme-preview">
-                            <div class="theme-preview-color" style="background: #0891b2;"></div>
-                            <div class="theme-preview-color" style="background: #f0f9ff;"></div>
-                            <div class="theme-preview-color" style="background: #06b6d4;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <script>
-                    function selectTheme(themeName) {
-                        // Remove active class from all options
-                        document.querySelectorAll('.theme-option').forEach(opt => {
-                            opt.classList.remove('active');
-                        });
-
-                        // Add active class to selected theme
-                        document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
-
-                        // Apply theme
-                        applyTheme(themeName);
-                    }
-
-                    // Load and mark current theme as active on page load
-                    document.addEventListener('DOMContentLoaded', () => {
-                        fetch('/api/settings/theme')
-                            .then(response => response.json())
-                            .then(data => {
-                                const themeName = data.theme || 'default';
-                                document.querySelector(`[data-theme="${themeName}"]`)?.classList.add('active');
-                            })
-                            .catch(err => console.error('Failed to load theme:', err));
-                    });
-                </script>
-            </div>
 
             <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
                 <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">界面个性化</h3>

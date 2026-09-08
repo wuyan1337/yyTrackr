@@ -27,10 +27,11 @@
         }
     </script>
     <link rel="stylesheet" href="/static/css/themes.css">
+    <link rel="stylesheet" href="/static/css/app-ui.css?v=20260908-1">
     <script src="/static/js/themes.js"></script>
     <script src="/static/js/mobile-menu.js"></script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+<body class="app-ui anime-app-shell bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
     <div class="flex flex-col min-h-screen">
         <!-- Header -->
         <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 transition-colors duration-200">
@@ -196,7 +197,7 @@
                 </div>
 
                 <!-- Calendar Grid -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="calendar-scroll bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700" tabindex="0" role="region" aria-label="Subscription calendar; scroll horizontally on small screens">
                     <!-- Day Headers -->
                     <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
                         <div class="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900">Sun</div>
@@ -263,12 +264,12 @@
             const startDay = firstOfMonth.getDay(); // 0 = Sunday, 6 = Saturday
 
             // Previous month days
-            const prevMonth = new Date(year, month - 2, 0);
+            const prevMonth = new Date(year, month - 1, 0);
             const daysInPrevMonth = prevMonth.getDate();
             for (let i = startDay - 1; i >= 0; i--) {
                 const day = daysInPrevMonth - i;
                 const cell = document.createElement('div');
-                cell.className = 'min-h-24 p-2 border-r border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50';
+                cell.className = 'calendar-day calendar-outside';
                 cell.innerHTML = `<div class="text-sm text-gray-400 dark:text-gray-600">${day}</div>`;
                 grid.appendChild(cell);
             }
@@ -279,9 +280,9 @@
                 const events = eventsByDate[dateKey] || [];
                 const cell = document.createElement('div');
                 const hasEvents = events.length > 0;
-                cell.className = `min-h-24 p-2 border-r border-b border-gray-200 dark:border-gray-700 ${hasEvents ? 'bg-slate-50 dark:bg-slate-800/60' : 'bg-white dark:bg-gray-800'}`;
+                cell.className = `calendar-day ${hasEvents ? 'calendar-day-has-events' : ''}`;
                 
-                let content = `<div class="text-sm font-medium text-gray-900 dark:text-white mb-1">${day}</div>`;
+                let content = `<div class="calendar-date">${day}</div>`;
                 if (hasEvents) {
                     content += '<div class="space-y-1">';
                     events.forEach(event => {
@@ -302,7 +303,7 @@
                             hx-target="#modal-content"
                             hx-swap="innerHTML"
                             hx-trigger="click"
-                            class="w-full text-left text-xs px-2 py-1 rounded bg-blue-100 dark:bg-gray-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-gray-600 transition-colors cursor-pointer flex items-center justify-between" 
+                            class="calendar-event w-full text-left text-xs px-2 py-1 rounded transition-colors cursor-pointer flex items-center justify-between"
                             title="${eventName} - ${currencySymbol}${cost}"
                             onclick="setTimeout(function() { document.getElementById('modal').classList.remove('hidden'); }, 50);">
                             <span class="flex items-center min-w-0 flex-1">
@@ -327,7 +328,7 @@
             const remainingCells = 42 - totalCells; // 6 rows * 7 days = 42
             for (let day = 1; day <= remainingCells; day++) {
                 const cell = document.createElement('div');
-                cell.className = 'min-h-24 p-2 border-r border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50';
+                cell.className = 'calendar-day calendar-outside';
                 cell.innerHTML = `<div class="text-sm text-gray-400 dark:text-gray-600">${day}</div>`;
                 grid.appendChild(cell);
             }

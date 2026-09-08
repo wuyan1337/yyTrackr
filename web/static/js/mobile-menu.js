@@ -3,17 +3,23 @@
 
 function openMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
+    const button = document.getElementById('mobile-menu-button');
     if (mobileMenu) {
         mobileMenu.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent body scroll when menu is open
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        button && button.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
     }
 }
 
 function closeMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
+    const button = document.getElementById('mobile-menu-button');
     if (mobileMenu) {
         mobileMenu.classList.add('hidden');
-        document.body.style.overflow = ''; // Restore body scroll
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        button && button.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
     }
 }
 

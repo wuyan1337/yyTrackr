@@ -1,10 +1,7 @@
-// Theme initialization - runs immediately to prevent flash
+// One internal theme, established before paint. Auth keeps its dedicated styling.
 (function() {
-    const theme = localStorage.getItem('subtrackr-theme') || 'dark-classic';
-    document.documentElement.setAttribute('data-theme', theme);
-
-    // Handle Tailwind dark mode for dark-classic theme
-    if (theme === 'dark-classic') {
-        document.documentElement.classList.add('dark');
-    }
+    const path = window.location.pathname.replace(/\/$/, '') || '/';
+    if (['/login', '/register', '/forgot-password', '/reset-password'].includes(path)) return;
+    document.documentElement.setAttribute('data-theme', 'dark-classic');
+    document.documentElement.classList.add('dark');
 })();
