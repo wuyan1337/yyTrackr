@@ -43,6 +43,12 @@ func buildNotificationLines(subscription *models.Subscription, settings *Setting
 	if subscription.URL != "" {
 		lines = append(lines, fmt.Sprintf("链接：%s", subscription.URL))
 	}
+	if subscription.PaymentMethod != "" {
+		lines = append(lines, fmt.Sprintf("支付方式：%s", subscription.PaymentMethod))
+	}
+	if subscription.Notes != "" {
+		lines = append(lines, fmt.Sprintf("备注：%s", subscription.Notes))
+	}
 
 	return lines
 }

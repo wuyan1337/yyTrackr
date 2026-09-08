@@ -40,6 +40,8 @@ type WebhookSubscription struct {
 	MonthlyCost      float64 `json:"monthly_cost"`
 	Category         string  `json:"category,omitempty"`
 	URL              string  `json:"url,omitempty"`
+	PaymentMethod    string  `json:"payment_method,omitempty"`
+	Notes            string  `json:"notes,omitempty"`
 	RenewalDate      string  `json:"renewal_date,omitempty"`
 	CancellationDate string  `json:"cancellation_date,omitempty"`
 }
@@ -67,6 +69,8 @@ func subscriptionToWebhook(sub *models.Subscription, settings *SettingsService) 
 		CurrencySymbol: currencySymbol,
 		Schedule:       sub.Schedule,
 		MonthlyCost:    sub.MonthlyCost(),
+		PaymentMethod:  sub.PaymentMethod,
+		Notes:          sub.Notes,
 	}
 	if sub.Category.Name != "" {
 		ws.Category = sub.Category.Name
@@ -203,7 +207,7 @@ func (w *WebhookService) SendRenewalReminder(subscription *models.Subscription, 
 	payload := &WebhookPayload{
 		Event:        "renewal_reminder",
 		Title:        fmt.Sprintf("续费提醒｜%s", subscription.Name),
-		Message:      fmt.Sprintf("%s续费。", formatReminderDetail(daysUntilRenewal, "续费")),
+		Message:      joinNotificationLines(formatReminderDetail(daysUntilRenewal, "续费")+"。", joinNotificationLines(buildNotificationLines(subscription, w.settingsService)...)),
 		Subscription: subscriptionToWebhook(subscription, w.settingsService),
 		Timestamp:    time.Now().UTC().Format(time.RFC3339),
 	}
@@ -220,7 +224,7 @@ func (w *WebhookService) SendCancellationReminder(subscription *models.Subscript
 	payload := &WebhookPayload{
 		Event:        "cancellation_reminder",
 		Title:        fmt.Sprintf("到期提醒｜%s", subscription.Name),
-		Message:      fmt.Sprintf("%s到期。", formatReminderDetail(daysUntilCancellation, "到期")),
+		Message:      joinNotificationLines(formatReminderDetail(daysUntilCancellation, "到期")+"。", joinNotificationLines(buildNotificationLines(subscription, w.settingsService)...)),
 		Subscription: subscriptionToWebhook(subscription, w.settingsService),
 		Timestamp:    time.Now().UTC().Format(time.RFC3339),
 	}

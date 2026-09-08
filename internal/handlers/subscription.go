@@ -722,7 +722,7 @@ func (h *SubscriptionHandler) CreateSubscription(c *gin.Context) {
 	subscription.Status = c.PostForm("status")
 	subscription.OriginalCurrency = c.PostForm("original_currency")
 	if subscription.OriginalCurrency == "" {
-		subscription.OriginalCurrency = "USD" // Default to USD
+		subscription.OriginalCurrency = settingsService.GetCurrency()
 	}
 	subscription.PaymentMethod = c.PostForm("payment_method")
 	subscription.Account = c.PostForm("account")
@@ -855,12 +855,8 @@ func (h *SubscriptionHandler) UpdateSubscription(c *gin.Context) {
 	if val, ok := c.GetPostForm("status"); ok {
 		existing.Status = val
 	}
-	if val, ok := c.GetPostForm("original_currency"); ok {
-		if val == "" {
-			existing.OriginalCurrency = "USD"
-		} else {
-			existing.OriginalCurrency = val
-		}
+	if val, ok := c.GetPostForm("original_currency"); ok && val != "" {
+		existing.OriginalCurrency = val
 	}
 	if val, ok := c.GetPostForm("payment_method"); ok {
 		existing.PaymentMethod = val
@@ -1011,11 +1007,12 @@ func (h *SubscriptionHandler) GetSubscriptionForm(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "subscription-form.html", gin.H{
-		"Subscription":   subscription,
-		"IsEdit":         isEdit,
-		"CurrencySymbol": settingsService.GetCurrencySymbol(),
-		"Categories":     categories,
-		"Currencies":     service.GetAvailableCurrencies(),
+		"Subscription":    subscription,
+		"IsEdit":          isEdit,
+		"CurrencySymbol":  settingsService.GetCurrencySymbol(),
+		"Categories":      categories,
+		"Currencies":      service.GetAvailableCurrencies(),
+		"DefaultCurrency": settingsService.GetCurrency(),
 	})
 }
 

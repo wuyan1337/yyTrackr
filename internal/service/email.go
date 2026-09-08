@@ -157,6 +157,8 @@ func renderNotificationEmail(title string, intro string, subscription *models.Su
 			<div class="detail-row"><span class="label">费用：</span>{{.CurrencySymbol}}{{printf "%.2f" .Subscription.Cost}} {{.Subscription.Schedule}}</div>
 			<div class="detail-row"><span class="label">折算月费：</span>{{.CurrencySymbol}}{{printf "%.2f" (.Subscription.MonthlyCost)}}</div>
 			{{if and .Subscription.Category .Subscription.Category.Name}}<div class="detail-row"><span class="label">分类：</span>{{.Subscription.Category.Name}}</div>{{end}}
+			{{if .Subscription.PaymentMethod}}<div class="detail-row"><span class="label">支付方式：</span>{{.Subscription.PaymentMethod}}</div>{{end}}
+			{{if .Subscription.Notes}}<div class="detail-row" style="white-space: pre-wrap"><span class="label">备注：</span>{{.Subscription.Notes}}</div>{{end}}
 			{{if .DateValue}}<div class="detail-row"><span class="label">{{.DateLabel}}：</span>{{.DateValue}}</div>{{end}}
 			{{if .Subscription.URL}}<div class="detail-row"><span class="label">链接：</span><a href="{{.Subscription.URL}}">{{.Subscription.URL}}</a></div>{{end}}
 		</div>
