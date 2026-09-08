@@ -1,0 +1,51 @@
+/* Settings-only refinement. Surface/border rhythm informed by React Bits
+ * SpotlightCard.css (DavidHDev/react-bits); existing attribution:
+ * /static/licenses/react-bits-spotlight.md. No React or pointer effects needed. */
+.settings-page main { padding: 32px 24px 48px; }
+.settings-page main > .max-w-7xl { max-width: 960px; }
+.settings-page main .max-w-4xl { max-width: none; }
+.settings-page main .glass-card { border-radius: 16px; overflow: visible; }
+.settings-page main .glass-card > .p-6:first-child { padding: 26px 28px 22px; }
+.settings-page main h2 { font-size: 22px; letter-spacing: -.025em; }
+.settings-page .settings-sections { padding: 0 28px 8px; }
+.settings-page .settings-sections > .border-t { margin: 0; padding: 26px 0; }
+.settings-page .settings-sections > .border-t:first-child { border-top: 0; }
+.settings-page .settings-sections h3 { font-size: 16px; font-weight: 650; margin-bottom: 14px; }
+.settings-page main p { line-height: 1.65; overflow-wrap: anywhere; }
+.settings-page main .control-panel { padding: 18px; border-radius: 10px; background: #191c1f !important; }
+.settings-page .settings-sections > div > .bg-gray-50 { background: #191c1f !important; border: 1px solid var(--app-border); border-radius: 10px; padding: 18px; }
+.settings-page main :is(input:not([type=checkbox]):not([type=radio]), textarea, select) { border-radius: 8px; min-height: 42px; padding: 10px 12px; box-shadow: none; }
+.settings-page main .login-field { width: 100%; border: 1px solid var(--app-border); }
+.settings-page main :is(button:not(.rounded-full), a.inline-block, a.inline-flex) { min-height: 42px; border: 1px solid #48535b; border-radius: 8px; box-shadow: none; }
+.settings-page main :is(button:not(.rounded-full), a.inline-block, a.inline-flex):hover { border-color: #87939c; }
+.settings-page main :is(button.rounded-full, label > span.relative) { flex-shrink: 0; }
+.settings-page main input.sr-only:focus-visible + span { outline: 2px solid #b4c9d6; outline-offset: 4px; }
+.settings-page main label:has(> input[type=radio]) { padding: 12px; min-height: 46px; border: 1px solid var(--app-border); border-radius: 8px; align-items: start; gap: 4px; }
+.settings-page main label:has(> input[type=radio]:checked) { background: #283139; border-color: #7c919e; }
+.settings-page main input[type=radio] { margin-top: 4px; flex-shrink: 0; accent-color: #9cb7c7; }
+.settings-page main .flex-1, .settings-page main .grid > div { min-width: 0; }
+.settings-page .settings-sections .space-y-4 > .flex.justify-between { gap: 20px; padding: 9px 0; }
+.settings-page #api-docs { scroll-margin-top: 24px; }
+.settings-page #api-docs > div { border: 1px solid var(--app-border); border-radius: 16px; }
+.settings-page #api-docs .p-6 { padding: 26px 28px; }
+.settings-page #api-docs :is(code, .font-mono), .settings-page #api-keys-list { overflow-wrap: anywhere; word-break: break-word; }
+.settings-page #api-docs table { table-layout: fixed; width: 100%; }
+.settings-page #api-docs th:first-child { width: 80px; }
+.settings-page #api-docs :is(td, th) { padding: 10px 12px; overflow-wrap: anywhere; }
+.settings-page main pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+ .settings-page main { padding: 18px 12px 32px; }
+ .settings-page main .glass-card > .p-6:first-child, .settings-page #api-docs .p-6 { padding: 20px 16px; }
+ .settings-page .settings-sections { padding: 0 16px 4px; }
+ .settings-page .settings-sections > .border-t { padding: 22px 0; }
+ .settings-page main .control-panel, .settings-page .settings-sections > div > .bg-gray-50 { padding: 14px; }
+ .settings-page main :is(.flex.space-x-2, .flex.space-x-3) { flex-wrap: wrap; gap: 10px; }
+ .settings-page main :is(.flex.space-x-2, .flex.space-x-3) > * { margin-left: 0; }
+ .settings-page main .flex.items-end > .flex-1 { flex-basis: 100%; }
+ .settings-page .settings-sections .space-y-4 > .flex.justify-between { flex-wrap: nowrap; gap: 12px; }
+ .settings-page .settings-sections .space-y-4 > .flex.justify-between > :last-child { flex-shrink: 0; }
+ .settings-page main input[type=number] { padding: 8px; }
+ .settings-page main label:has(> input[type=radio]) { padding: 10px; }
+ .settings-page #api-docs :is(td, th) { padding: 9px 6px; font-size: 12px; }
+ .settings-page #api-docs th:first-child { width: 60px; }
+}
