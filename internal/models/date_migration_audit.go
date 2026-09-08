@@ -8,14 +8,14 @@ import (
 
 // DateMigrationLog tracks changes made during date calculation migrations
 type DateMigrationLog struct {
-	ID             uint      `json:"id" gorm:"primaryKey"`
-	SubscriptionID uint      `json:"subscription_id" gorm:"not null"`
-	OldVersion     int       `json:"old_version" gorm:"not null"`
-	NewVersion     int       `json:"new_version" gorm:"not null"`
-	OldRenewalDate *time.Time `json:"old_renewal_date"`
-	NewRenewalDate *time.Time `json:"new_renewal_date"`
-	MigrationReason string    `json:"migration_reason" gorm:"size:255"`
-	MigratedAt     time.Time `json:"migrated_at" gorm:"autoCreateTime"`
+	ID              uint       `json:"id" gorm:"primaryKey"`
+	SubscriptionID  uint       `json:"subscription_id" gorm:"not null"`
+	OldVersion      int        `json:"old_version" gorm:"not null"`
+	NewVersion      int        `json:"new_version" gorm:"not null"`
+	OldRenewalDate  *time.Time `json:"old_renewal_date"`
+	NewRenewalDate  *time.Time `json:"new_renewal_date"`
+	MigrationReason string     `json:"migration_reason" gorm:"size:255"`
+	MigratedAt      time.Time  `json:"migrated_at" gorm:"autoCreateTime"`
 }
 
 // DateMigrationSafetyCheck provides utilities for safe date calculation migrations

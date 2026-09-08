@@ -9,10 +9,10 @@ import (
 
 func TestExchangeRate_IsStale(t *testing.T) {
 	tests := []struct {
-		name           string
-		lastUpdated    time.Time
-		expectedStale  bool
-		description    string
+		name          string
+		lastUpdated   time.Time
+		expectedStale bool
+		description   string
 	}{
 		{
 			name:          "Fresh rate - just updated",

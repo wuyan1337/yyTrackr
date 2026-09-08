@@ -44,8 +44,6 @@ func Run() {
 	subscriptionService := service.NewSubscriptionService(subscriptionRepo, categoryService)
 	settingsService := service.NewSettingsService(settingsRepo)
 	userService := service.NewUserService(userRepo)
-	emailService := service.NewEmailService(settingsService.ForUser(0))
-	pushoverService := service.NewPushoverService(settingsService.ForUser(0))
 	telegramService := service.NewTelegramService(settingsService.ForUser(0))
 	webhookService := service.NewWebhookService(settingsService.ForUser(0))
 	logoService := service.NewLogoService()
@@ -56,7 +54,7 @@ func Run() {
 	}
 	sessionService := service.NewSessionService(sessionSecret)
 
-	subscriptionHandler := handlers.NewSubscriptionHandler(subscriptionService, settingsService, currencyService, emailService, pushoverService, telegramService, webhookService, logoService, cfg.DevPreview)
+	subscriptionHandler := handlers.NewSubscriptionHandler(subscriptionService, settingsService, currencyService, telegramService, webhookService, logoService, cfg.DevPreview)
 	settingsHandler := handlers.NewSettingsHandler(settingsService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	authHandler := handlers.NewAuthHandler(userService, settingsService, sessionService)
@@ -161,7 +159,7 @@ func loadTemplates() *template.Template {
 		"templates/subscription-list.html",
 		"templates/categories-list.html",
 		"templates/api-keys-list.html",
-		"templates/smtp-message.html",
+		"templates/settings-message.html",
 		"templates/form-errors.html",
 		"templates/error.html",
 		"templates/login.html",
@@ -213,7 +211,6 @@ func loadTemplates() *template.Template {
 func setupRoutes(router *gin.Engine, handler *handlers.SubscriptionHandler, settingsHandler *handlers.SettingsHandler, settingsService *service.SettingsService, categoryHandler *handlers.CategoryHandler, authHandler *handlers.AuthHandler) {
 	router.GET("/register", authHandler.ShowRegisterPage)
 	router.GET("/login", authHandler.ShowLoginPage)
-	router.GET("/ical/:token", handler.ServeICalSubscription)
 
 	router.GET("/", handler.Dashboard)
 	router.GET("/dashboard", handler.Dashboard)
@@ -239,15 +236,7 @@ func setupRoutes(router *gin.Engine, handler *handlers.SubscriptionHandler, sett
 
 		api.GET("/export/csv", handler.ExportCSV)
 		api.GET("/export/json", handler.ExportJSON)
-		api.GET("/export/ical", handler.ExportICal)
-		api.GET("/backup", handler.BackupData)
-		api.DELETE("/clear-all", handler.ClearAllData)
 
-		api.POST("/settings/smtp", settingsHandler.SaveSMTPSettings)
-		api.POST("/settings/smtp/test", settingsHandler.TestSMTPConnection)
-		api.POST("/settings/pushover", settingsHandler.SavePushoverSettings)
-		api.POST("/settings/pushover/test", settingsHandler.TestPushoverConnection)
-		api.GET("/settings/pushover", settingsHandler.GetPushoverConfig)
 		api.POST("/settings/telegram", settingsHandler.SaveTelegramSettings)
 		api.POST("/settings/telegram/test", settingsHandler.TestTelegramConnection)
 		api.GET("/settings/telegram", settingsHandler.GetTelegramConfig)
@@ -255,7 +244,6 @@ func setupRoutes(router *gin.Engine, handler *handlers.SubscriptionHandler, sett
 		api.POST("/settings/webhook/test", settingsHandler.TestWebhookConnection)
 		api.POST("/settings/notifications/:setting", settingsHandler.UpdateNotificationSetting)
 		api.GET("/settings/notifications", settingsHandler.GetNotificationSettings)
-		api.GET("/settings/smtp", settingsHandler.GetSMTPConfig)
 		api.GET("/settings/apikeys", settingsHandler.ListAPIKeys)
 		api.POST("/settings/apikeys", settingsHandler.CreateAPIKey)
 		api.DELETE("/settings/apikeys/:id", settingsHandler.DeleteAPIKey)
@@ -271,10 +259,6 @@ func setupRoutes(router *gin.Engine, handler *handlers.SubscriptionHandler, sett
 		api.GET("/auth/logout", authHandler.Logout)
 		api.GET("/settings/theme", settingsHandler.GetTheme)
 		api.POST("/settings/theme", settingsHandler.SetTheme)
-		api.POST("/settings/ical/toggle", settingsHandler.ToggleICalSubscription)
-		api.GET("/settings/ical/url", settingsHandler.GetICalSubscriptionURL)
-		api.POST("/settings/ical/regenerate", settingsHandler.RegenerateICalToken)
-		api.POST("/settings/base-url", settingsHandler.UpdateBaseURL)
 		api.GET("/settings/personalization", settingsHandler.GetUIPersonalizationSettings)
 		api.POST("/settings/personalization", settingsHandler.SaveUIPersonalizationSettings)
 	}
@@ -340,18 +324,14 @@ func checkAndSendRenewalReminders(userService *service.UserService, subscription
 			continue
 		}
 
-		emailService := service.NewEmailService(userSettings)
-		pushoverService := service.NewPushoverService(userSettings)
 		telegramService := service.NewTelegramService(userSettings)
 		webhookService := service.NewWebhookService(userSettings)
 
 		for sub, daysUntil := range subscriptions {
-			emailErr := emailService.SendRenewalReminder(sub, daysUntil)
-			pushoverErr := pushoverService.SendRenewalReminder(sub, daysUntil)
 			telegramErr := telegramService.SendRenewalReminder(sub, daysUntil)
 			webhookErr := webhookService.SendRenewalReminder(sub, daysUntil)
-			if emailErr != nil && pushoverErr != nil && telegramErr != nil && webhookErr != nil {
-				log.Printf("Error sending renewal reminder for user %d subscription %s (ID: %d): email=%v, pushover=%v, telegram=%v, webhook=%v", user.ID, sub.Name, sub.ID, emailErr, pushoverErr, telegramErr, webhookErr)
+			if telegramErr != nil && webhookErr != nil {
+				log.Printf("Error sending renewal reminder for user %d subscription %s (ID: %d): telegram=%v, webhook=%v", user.ID, sub.Name, sub.ID, telegramErr, webhookErr)
 				continue
 			}
 
@@ -424,18 +404,14 @@ func checkAndSendCancellationReminders(userService *service.UserService, subscri
 			continue
 		}
 
-		emailService := service.NewEmailService(userSettings)
-		pushoverService := service.NewPushoverService(userSettings)
 		telegramService := service.NewTelegramService(userSettings)
 		webhookService := service.NewWebhookService(userSettings)
 
 		for sub, daysUntil := range subscriptions {
-			emailErr := emailService.SendCancellationReminder(sub, daysUntil)
-			pushoverErr := pushoverService.SendCancellationReminder(sub, daysUntil)
 			telegramErr := telegramService.SendCancellationReminder(sub, daysUntil)
 			webhookErr := webhookService.SendCancellationReminder(sub, daysUntil)
-			if emailErr != nil && pushoverErr != nil && telegramErr != nil && webhookErr != nil {
-				log.Printf("Error sending cancellation reminder for user %d subscription %s (ID: %d): email=%v, pushover=%v, telegram=%v, webhook=%v", user.ID, sub.Name, sub.ID, emailErr, pushoverErr, telegramErr, webhookErr)
+			if telegramErr != nil && webhookErr != nil {
+				log.Printf("Error sending cancellation reminder for user %d subscription %s (ID: %d): telegram=%v, webhook=%v", user.ID, sub.Name, sub.ID, telegramErr, webhookErr)
 				continue
 			}
 

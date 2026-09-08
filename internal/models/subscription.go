@@ -174,7 +174,6 @@ func (s *Subscription) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
-
 // advanceRenewalFromDate advances the renewal date from a given base date by one or more
 // billing periods until it lands in the future. Used when StartDate is nil to preserve
 // cycle alignment instead of drifting to time.Now().

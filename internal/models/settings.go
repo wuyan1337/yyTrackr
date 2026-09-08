@@ -14,23 +14,6 @@ type Settings struct {
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// SMTPConfig represents SMTP configuration
-type SMTPConfig struct {
-	Host     string `json:"smtp_host"`
-	Port     int    `json:"smtp_port"`
-	Username string `json:"smtp_username"`
-	Password string `json:"smtp_password"`
-	From     string `json:"smtp_from"`
-	FromName string `json:"smtp_from_name"`
-	To       string `json:"smtp_to"` // Recipient email address for notifications
-}
-
-// PushoverConfig represents Pushover notification configuration
-type PushoverConfig struct {
-	UserKey  string `json:"pushover_user_key"`  // Pushover user key
-	AppToken string `json:"pushover_app_token"` // Pushover application token
-}
-
 // TelegramConfig represents Telegram bot notification configuration
 type TelegramConfig struct {
 	BotToken string `json:"telegram_bot_token"`

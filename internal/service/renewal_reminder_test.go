@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/glebarez/sqlite"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -207,88 +207,6 @@ func TestSubscriptionService_GetSubscriptionsNeedingReminders(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestEmailService_SendRenewalReminder_Disabled(t *testing.T) {
-	db := setupRenewalReminderTestDB(t)
-	settingsRepo := repository.NewSettingsRepository(db)
-	settingsService := NewSettingsService(settingsRepo)
-	emailService := NewEmailService(settingsService)
-
-	// Ensure reminders are disabled
-	settingsService.SetBoolSetting("renewal_reminders", false)
-
-	subscription := &models.Subscription{
-		Name:        "Test Subscription",
-		Cost:        10.00,
-		Schedule:    "Monthly",
-		Status:      "Active",
-		RenewalDate: timePtr(time.Now().AddDate(0, 0, 3)),
-	}
-
-	// Should return nil without error when disabled
-	err := emailService.SendRenewalReminder(subscription, 3)
-	assert.NoError(t, err, "Should return nil when reminders are disabled")
-}
-
-func TestEmailService_SendRenewalReminder_EnabledButNoSMTP(t *testing.T) {
-	db := setupRenewalReminderTestDB(t)
-	settingsRepo := repository.NewSettingsRepository(db)
-	settingsService := NewSettingsService(settingsRepo)
-	emailService := NewEmailService(settingsService)
-
-	// Enable reminders but don't configure SMTP
-	settingsService.SetBoolSetting("renewal_reminders", true)
-
-	subscription := &models.Subscription{
-		Name:        "Test Subscription",
-		Cost:        10.00,
-		Schedule:    "Monthly",
-		Status:      "Active",
-		RenewalDate: timePtr(time.Now().AddDate(0, 0, 3)),
-	}
-
-	// Should return error when SMTP is not configured
-	err := emailService.SendRenewalReminder(subscription, 3)
-	assert.Error(t, err, "Should return error when SMTP is not configured")
-	assert.Contains(t, err.Error(), "SMTP", "Error should mention SMTP")
-}
-
-func TestEmailService_SendRenewalReminder_WithSMTPConfig(t *testing.T) {
-	db := setupRenewalReminderTestDB(t)
-	settingsRepo := repository.NewSettingsRepository(db)
-	settingsService := NewSettingsService(settingsRepo)
-	emailService := NewEmailService(settingsService)
-
-	// Enable reminders
-	settingsService.SetBoolSetting("renewal_reminders", true)
-
-	// Configure SMTP (using invalid config - we're just testing the logic, not actual email sending)
-	smtpConfig := &models.SMTPConfig{
-		Host:     "smtp.example.com",
-		Port:     587,
-		Username: "test@example.com",
-		Password: "password",
-		From:     "test@example.com",
-		FromName: "Test",
-		To:       "recipient@example.com",
-	}
-	settingsService.SaveSMTPConfig(smtpConfig)
-
-	subscription := &models.Subscription{
-		Name:        "Test Subscription",
-		Cost:        10.00,
-		Schedule:    "Monthly",
-		Status:      "Active",
-		RenewalDate: timePtr(time.Now().AddDate(0, 0, 3)),
-	}
-
-	// This will fail because we don't have a real SMTP server, but it should get past the enabled check
-	err := emailService.SendRenewalReminder(subscription, 3)
-	// We expect an error because we can't actually connect to SMTP, but the function should attempt to send
-	assert.Error(t, err, "Should return error when SMTP connection fails (expected in test)")
-	// The error should be about connection, not about being disabled
-	assert.NotContains(t, err.Error(), "disabled", "Error should not be about being disabled")
 }
 
 func TestSubscriptionService_GetSubscriptionsNeedingReminders_DaysCalculation(t *testing.T) {

@@ -1,7 +1,7 @@
 // The internal theme is fixed by theme-init.js; only UI personalization is persisted.
 function isAuthPage() {
     const path = window.location.pathname.replace(/\/$/, '');
-    return ['/login', '/register', '/forgot-password', '/reset-password'].includes(path);
+    return ['/login', '/register'].includes(path);
 }
 
 function applyUIPersonalization(config) {

@@ -27,7 +27,7 @@ test('calendar previous-month calculation handles leap February and year boundar
 });
 test('calendar semantic surfaces retain editing and scrolling hooks', () => {
   const html = read('templates/calendar.html');
-  for (const token of ['calendar-day','calendar-event','calendar-outside','calendar-date','calendar-scroll','htmx.process(cell)','hx-get="/form/subscription/${eventId}"','/api/export/ical','copyCalSubscriptionURL','PrevMonth','NextMonth','Today']) assert.ok(html.includes(token), token);
+  for (const token of ['calendar-day','calendar-event','calendar-outside','calendar-date','calendar-scroll','htmx.process(cell)','hx-get="/form/subscription/${eventId}"','PrevMonth','NextMonth','Today']) assert.ok(html.includes(token), token);
   assert.ok(!html.includes('bg-slate-50 dark:bg-slate-800/60'));
 });
 test('all internal pages share CSS and functioning mobile menu hooks', () => {

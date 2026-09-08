@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/glebarez/sqlite"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -136,7 +136,7 @@ func TestSubscription_BeforeUpdate_ScheduleChange(t *testing.T) {
 	db := setupTestDB(t)
 
 	// Create a subscription with initial schedule
-	startDate := time.Now().AddDate(0, -3, 0) // 3 months ago
+	startDate := time.Now().AddDate(0, -3, 0)  // 3 months ago
 	renewalDate := time.Now().AddDate(0, 1, 0) // 1 month from now
 	sub := &Subscription{
 		Name:        "Test Subscription",
@@ -278,34 +278,34 @@ func TestSubscription_BeforeCreate_WithStartDate(t *testing.T) {
 	db := setupTestDB(t)
 
 	tests := []struct {
-		name         string
-		schedule     string
-		startDate    time.Time
-		description  string
+		name        string
+		schedule    string
+		startDate   time.Time
+		description string
 	}{
 		{
-			name:         "Monthly subscription with past start date",
-			schedule:     "Monthly",
-			startDate:    time.Now().AddDate(0, -2, -15), // 2.5 months ago
-			description:  "Should calculate next monthly anniversary",
+			name:        "Monthly subscription with past start date",
+			schedule:    "Monthly",
+			startDate:   time.Now().AddDate(0, -2, -15), // 2.5 months ago
+			description: "Should calculate next monthly anniversary",
 		},
 		{
-			name:         "Annual subscription with past start date",
-			schedule:     "Annual",
-			startDate:    time.Now().AddDate(0, -6, 0), // 6 months ago
-			description:  "Should calculate next annual anniversary",
+			name:        "Annual subscription with past start date",
+			schedule:    "Annual",
+			startDate:   time.Now().AddDate(0, -6, 0), // 6 months ago
+			description: "Should calculate next annual anniversary",
 		},
 		{
-			name:         "Weekly subscription with past start date",
-			schedule:     "Weekly",
-			startDate:    time.Now().AddDate(0, 0, -10), // 10 days ago
-			description:  "Should calculate next weekly anniversary",
+			name:        "Weekly subscription with past start date",
+			schedule:    "Weekly",
+			startDate:   time.Now().AddDate(0, 0, -10), // 10 days ago
+			description: "Should calculate next weekly anniversary",
 		},
 		{
-			name:         "Future start date",
-			schedule:     "Monthly",
-			startDate:    time.Now().AddDate(0, 0, 7), // 7 days in future
-			description:  "Should set renewal one month after future start date",
+			name:        "Future start date",
+			schedule:    "Monthly",
+			startDate:   time.Now().AddDate(0, 0, 7), // 7 days in future
+			description: "Should set renewal one month after future start date",
 		},
 	}
 
@@ -509,53 +509,53 @@ func TestSubscription_IsHighCost(t *testing.T) {
 // Note: These tests focus on the core logic, not exact historical sequences
 func TestSubscription_DateEdgeCases(t *testing.T) {
 	tests := []struct {
-		name          string
-		startDate     string
-		schedule      string
+		name             string
+		startDate        string
+		schedule         string
 		expectedBehavior string
-		description   string
+		description      string
 	}{
 		{
-			name:          "January 31st Monthly - Month End Handling",
-			startDate:     "2025-01-31T10:00:00Z",
-			schedule:      "Monthly",
+			name:             "January 31st Monthly - Month End Handling",
+			startDate:        "2025-01-31T10:00:00Z",
+			schedule:         "Monthly",
 			expectedBehavior: "future_month_end",
-			description:   "Jan 31 should calculate next month-end after current date",
+			description:      "Jan 31 should calculate next month-end after current date",
 		},
 		{
-			name:          "February 29th Leap Year - Next Occurrence",
-			startDate:     "2024-02-29T10:00:00Z", // 2024 is leap year
-			schedule:      "Monthly",
+			name:             "February 29th Leap Year - Next Occurrence",
+			startDate:        "2024-02-29T10:00:00Z", // 2024 is leap year
+			schedule:         "Monthly",
 			expectedBehavior: "next_valid_date",
-			description:   "Feb 29 (leap) should find next valid renewal after current date",
+			description:      "Feb 29 (leap) should find next valid renewal after current date",
 		},
 		{
-			name:          "February 29th Annual - Leap Year Handling",
-			startDate:     "2024-02-29T10:00:00Z",
-			schedule:      "Annual",
+			name:             "February 29th Annual - Leap Year Handling",
+			startDate:        "2024-02-29T10:00:00Z",
+			schedule:         "Annual",
 			expectedBehavior: "next_anniversary",
-			description:   "Feb 29 annual should find next anniversary after current date",
+			description:      "Feb 29 annual should find next anniversary after current date",
 		},
 		{
-			name:          "Past Start Date Monthly",
-			startDate:     "2024-01-31T10:00:00Z", // Past date
-			schedule:      "Monthly",
+			name:             "Past Start Date Monthly",
+			startDate:        "2024-01-31T10:00:00Z", // Past date
+			schedule:         "Monthly",
 			expectedBehavior: "next_occurrence_after_now",
-			description:   "Past start date should find next occurrence after current time",
+			description:      "Past start date should find next occurrence after current time",
 		},
 		{
-			name:          "Future Start Date Monthly",
-			startDate:     "2025-10-15T10:00:00Z", // Future date
-			schedule:      "Monthly",
+			name:             "Future Start Date Monthly",
+			startDate:        "2025-10-15T10:00:00Z", // Future date
+			schedule:         "Monthly",
 			expectedBehavior: "first_renewal_after_start",
-			description:   "Future start date should calculate first renewal properly",
+			description:      "Future start date should calculate first renewal properly",
 		},
 		{
-			name:          "July 31st Monthly - Current Edge Case",
-			startDate:     "2025-07-31T10:00:00Z",
-			schedule:      "Monthly",
+			name:             "July 31st Monthly - Current Edge Case",
+			startDate:        "2025-07-31T10:00:00Z",
+			schedule:         "Monthly",
 			expectedBehavior: "next_month_end",
-			description:   "July 31 should handle month-end logic correctly",
+			description:      "July 31 should handle month-end logic correctly",
 		},
 	}
 
@@ -628,7 +628,7 @@ func TestSubscription_ScheduleChangePreservation(t *testing.T) {
 	db := setupTestDB(t)
 
 	tests := []struct {
-		name           string
+		name            string
 		initialSchedule string
 		newSchedule     string
 		startDate       string
@@ -714,12 +714,12 @@ func TestSubscription_ScheduleChangePreservation(t *testing.T) {
 // TestSubscription_LeapYearHandling tests comprehensive leap year scenarios
 func TestSubscription_LeapYearHandling(t *testing.T) {
 	tests := []struct {
-		name          string
-		startDate     string
-		schedule      string
-		testYears     []int
-		expectedDays  []int
-		description   string
+		name         string
+		startDate    string
+		schedule     string
+		testYears    []int
+		expectedDays []int
+		description  string
 	}{
 		{
 			name:        "Feb 29 Monthly - Leap Year Handling",
@@ -807,11 +807,11 @@ func TestSubscription_TimezoneConsistency(t *testing.T) {
 // TestSubscription_DateCalculationV2 tests the Carbon-based V2 date calculation
 func TestSubscription_DateCalculationV2(t *testing.T) {
 	tests := []struct {
-		name          string
-		startDate     string
-		schedule      string
-		expectedNext  []string // First few renewal dates
-		description   string
+		name         string
+		startDate    string
+		schedule     string
+		expectedNext []string // First few renewal dates
+		description  string
 	}{
 		{
 			name:         "V2 January 31st Monthly - Month End Handling",

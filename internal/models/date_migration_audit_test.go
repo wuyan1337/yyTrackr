@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/glebarez/sqlite"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -40,11 +40,11 @@ func TestCompareCalculationVersions(t *testing.T) {
 	// Create a test subscription
 	startDate := time.Date(2025, 1, 31, 10, 0, 0, 0, time.UTC)
 	sub := &Subscription{
-		Name:      "Test Subscription",
-		Cost:      15.99,
-		Schedule:  "Monthly",
-		Status:    "Active",
-		StartDate: &startDate,
+		Name:                   "Test Subscription",
+		Cost:                   15.99,
+		Schedule:               "Monthly",
+		Status:                 "Active",
+		StartDate:              &startDate,
 		DateCalculationVersion: 1,
 	}
 
@@ -81,13 +81,13 @@ func TestGetMigrationStats(t *testing.T) {
 
 	// Create a migration log entry
 	log := &DateMigrationLog{
-		SubscriptionID:     subs[0].ID,
-		OldVersion:        1,
-		NewVersion:        2,
-		OldRenewalDate:    nil,
-		NewRenewalDate:    nil,
-		MigrationReason:   "Test migration",
-		MigratedAt:        time.Now(),
+		SubscriptionID:  subs[0].ID,
+		OldVersion:      1,
+		NewVersion:      2,
+		OldRenewalDate:  nil,
+		NewRenewalDate:  nil,
+		MigrationReason: "Test migration",
+		MigratedAt:      time.Now(),
 	}
 	err := db.Create(log).Error
 	assert.NoError(t, err)

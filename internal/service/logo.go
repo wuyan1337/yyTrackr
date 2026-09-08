@@ -172,4 +172,3 @@ func (s *LogoService) DownloadLogo(logoURL string) ([]byte, error) {
 
 	return data, nil
 }
-

@@ -20,18 +20,7 @@ func TestNotificationDetailsRegression(t *testing.T) {
 			t.Errorf("missing %q in %s", want, text)
 		}
 	}
-	body, err := renderNotificationEmail("到期提醒", "明天到期", sub, settings, "到期日期", "2027-01-01")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, want := range []string{"支付方式：", "支付宝", "备注：", "第一行", sub.URL, "&lt;script&gt;"} {
-		if !strings.Contains(body, want) {
-			t.Errorf("email missing %q", want)
-		}
-	}
-	if strings.Contains(body, "<script>") {
-		t.Fatal("unescaped notes")
-	}
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload WebhookPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {

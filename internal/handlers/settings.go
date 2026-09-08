@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"crypto/rand"
-	"crypto/tls"
+
 	"encoding/hex"
 	"fmt"
 	"log"
 	"net/http"
-	"net/smtp"
+
 	"strconv"
 	"strings"
 	"subtrackr/internal/middleware"
@@ -32,137 +32,6 @@ func NewSettingsHandler(service *service.SettingsService) *SettingsHandler {
 
 func (h *SettingsHandler) scopedService(c *gin.Context) *service.SettingsService {
 	return h.service.ForUser(middleware.CurrentUserID(c))
-}
-
-func (h *SettingsHandler) buildSMTPConfig(c *gin.Context, svc *service.SettingsService, preserveSavedPassword bool) (models.SMTPConfig, error) {
-	var config models.SMTPConfig
-	config.Host = strings.TrimSpace(c.PostForm("smtp_host"))
-	config.Username = strings.TrimSpace(c.PostForm("smtp_username"))
-	config.Password = c.PostForm("smtp_password")
-	config.From = strings.TrimSpace(c.PostForm("smtp_from"))
-	config.FromName = strings.TrimSpace(c.PostForm("smtp_from_name"))
-	config.To = strings.TrimSpace(c.PostForm("smtp_to"))
-
-	if portStr := strings.TrimSpace(c.PostForm("smtp_port")); portStr != "" {
-		if port, err := strconv.Atoi(portStr); err == nil {
-			config.Port = port
-		}
-	}
-
-	if preserveSavedPassword && strings.TrimSpace(config.Password) == "" {
-		existing, err := svc.GetSMTPConfig()
-		if err == nil && existing != nil {
-			config.Password = existing.Password
-		}
-	}
-
-	return config, nil
-}
-
-func (h *SettingsHandler) SaveSMTPSettings(c *gin.Context) {
-	svc := h.scopedService(c)
-	config, _ := h.buildSMTPConfig(c, svc, true)
-
-	if config.Host == "" || config.Port == 0 || config.Username == "" || config.Password == "" || config.From == "" || config.To == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "SMTP 必填项缺失：主机、端口、用户名、密码、发件邮箱、收件邮箱", "Type": "error"})
-		return
-	}
-
-	if err := svc.SaveSMTPConfig(&config); err != nil {
-		c.HTML(http.StatusInternalServerError, "smtp-message.html", gin.H{"Error": err.Error(), "Type": "error"})
-		return
-	}
-
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "SMTP 设置已保存。密码留空时会继续使用已保存的密码。", "Type": "success"})
-}
-
-func (h *SettingsHandler) TestSMTPConnection(c *gin.Context) {
-	svc := h.scopedService(c)
-	config, _ := h.buildSMTPConfig(c, svc, true)
-
-	if config.Host == "" || config.Port == 0 || config.Username == "" || config.Password == "" || config.From == "" || config.To == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "测试邮件需要完整的 SMTP 主机、端口、用户名、密码、发件邮箱和收件邮箱", "Type": "error"})
-		return
-	}
-
-	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
-	auth := smtp.PlainAuth("", config.Username, config.Password, config.Host)
-	isSSLPort := config.Port == 465 || config.Port == 8465 || config.Port == 443
-
-	var client *smtp.Client
-	var err error
-
-	if isSSLPort {
-		conn, err := tls.Dial("tcp", addr, &tls.Config{ServerName: config.Host})
-		if err != nil {
-			c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("SSL 连接失败：%v", err), "Type": "error"})
-			return
-		}
-		client, err = smtp.NewClient(conn, config.Host)
-		if err != nil {
-			conn.Close()
-			c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("创建 SMTP 客户端失败：%v", err), "Type": "error"})
-			return
-		}
-	} else {
-		client, err = smtp.Dial(addr)
-		if err != nil {
-			c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("SMTP 连接失败：%v", err), "Type": "error"})
-			return
-		}
-		if err = client.StartTLS(&tls.Config{ServerName: config.Host}); err != nil {
-			client.Close()
-			c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("启动 TLS 失败：%v", err), "Type": "error"})
-			return
-		}
-	}
-
-	defer client.Close()
-	if err = client.Auth(auth); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("SMTP 认证失败：%v", err), "Type": "error"})
-		return
-	}
-
-	if err = client.Mail(config.From); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("设置发件人失败：%v", err), "Type": "error"})
-		return
-	}
-	if err = client.Rcpt(config.To); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("设置收件人失败：%v", err), "Type": "error"})
-		return
-	}
-
-	writer, err := client.Data()
-	if err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("创建测试邮件失败：%v", err), "Type": "error"})
-		return
-	}
-
-	fromName := config.FromName
-	if fromName == "" {
-		fromName = "yyTrackr"
-	}
-	subject := "yyTrackr SMTP 测试邮件"
-	body := "<p>这是一封来自 yyTrackr 的测试邮件。</p><p>如果你收到这封邮件，说明当前 SMTP 配置可正常发送通知。</p>"
-	message := fmt.Sprintf("From: %s <%s>\r\n", fromName, config.From)
-	message += fmt.Sprintf("To: %s\r\n", config.To)
-	message += fmt.Sprintf("Subject: %s\r\n", subject)
-	message += "MIME-Version: 1.0\r\n"
-	message += "Content-Type: text/html; charset=UTF-8\r\n"
-	message += "\r\n"
-	message += body
-
-	if _, err = writer.Write([]byte(message)); err != nil {
-		_ = writer.Close()
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("写入测试邮件失败：%v", err), "Type": "error"})
-		return
-	}
-	if err = writer.Close(); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("发送测试邮件失败：%v", err), "Type": "error"})
-		return
-	}
-
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "SMTP 测试成功，测试邮件已经发送到收件邮箱。", "Type": "success"})
 }
 
 func (h *SettingsHandler) UpdateNotificationSetting(c *gin.Context) {
@@ -255,16 +124,16 @@ func (h *SettingsHandler) SaveUIPersonalizationSettings(c *gin.Context) {
 	}
 
 	if config.CustomBackgroundURL != "" && !strings.HasPrefix(config.CustomBackgroundURL, "http://") && !strings.HasPrefix(config.CustomBackgroundURL, "https://") {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Background image URL must use http:// or https://", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Background image URL must use http:// or https://", "Type": "error"})
 		return
 	}
 
 	if err := svc.SaveUIPersonalizationConfig(config); err != nil {
-		c.HTML(http.StatusInternalServerError, "smtp-message.html", gin.H{"Error": err.Error(), "Type": "error"})
+		c.HTML(http.StatusInternalServerError, "settings-message.html", gin.H{"Error": err.Error(), "Type": "error"})
 		return
 	}
 
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "UI personalization saved successfully", "Type": "success"})
+	c.HTML(http.StatusOK, "settings-message.html", gin.H{"Message": "UI personalization saved successfully", "Type": "success"})
 }
 
 func (h *SettingsHandler) GetUIPersonalizationSettings(c *gin.Context) {
@@ -275,17 +144,6 @@ func (h *SettingsHandler) GetUIPersonalizationSettings(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, config)
-}
-
-func (h *SettingsHandler) GetSMTPConfig(c *gin.Context) {
-	svc := h.scopedService(c)
-	config, err := svc.GetSMTPConfig()
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"configured": false})
-		return
-	}
-	config.Password = ""
-	c.JSON(http.StatusOK, gin.H{"configured": true, "config": config})
 }
 
 func (h *SettingsHandler) ListAPIKeys(c *gin.Context) {
@@ -395,70 +253,16 @@ func (h *SettingsHandler) GetTheme(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"theme": theme})
 }
 
-func (h *SettingsHandler) SavePushoverSettings(c *gin.Context) {
-	svc := h.scopedService(c)
-	config := models.PushoverConfig{
-		UserKey:  c.PostForm("pushover_user_key"),
-		AppToken: c.PostForm("pushover_app_token"),
-	}
-	if config.UserKey == "" || config.AppToken == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "User Key and App Token are required", "Type": "error"})
-		return
-	}
-	if err := svc.SavePushoverConfig(&config); err != nil {
-		c.HTML(http.StatusInternalServerError, "smtp-message.html", gin.H{"Error": err.Error(), "Type": "error"})
-		return
-	}
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "Pushover settings saved successfully", "Type": "success"})
-}
-
-func (h *SettingsHandler) TestPushoverConnection(c *gin.Context) {
-	svc := h.scopedService(c)
-	config := models.PushoverConfig{
-		UserKey:  c.PostForm("pushover_user_key"),
-		AppToken: c.PostForm("pushover_app_token"),
-	}
-	if config.UserKey == "" || config.AppToken == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "User Key and App Token are required for testing", "Type": "error"})
-		return
-	}
-
-	pushoverService := service.NewPushoverService(svc)
-	originalConfig, _ := svc.GetPushoverConfig()
-	defer func() {
-		var restoreErr error
-		if originalConfig != nil {
-			restoreErr = svc.SavePushoverConfig(originalConfig)
-		} else {
-			restoreErr = svc.SavePushoverConfig(&models.PushoverConfig{})
-		}
-		if restoreErr != nil {
-			log.Printf("Warning: failed to restore Pushover config after test: %v", restoreErr)
-		}
-	}()
-
-	if err := svc.SavePushoverConfig(&config); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("Failed to save test config: %v", err), "Type": "error"})
-		return
-	}
-
-	if err := pushoverService.SendNotification("yyTrackr 测试消息", "这是一条来自 yyTrackr 的测试通知。如果你收到了这条消息，说明当前 Pushover 配置工作正常。", 0); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("Failed to send test notification: %v", err), "Type": "error"})
-		return
-	}
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "Pushover 测试成功，请检查你的设备通知。", "Type": "success"})
-}
-
 func (h *SettingsHandler) SaveWebhookSettings(c *gin.Context) {
 	svc := h.scopedService(c)
 	var config models.WebhookConfig
 	config.URL = c.PostForm("webhook_url")
 	if config.URL == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Webhook URL is required", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Webhook URL is required", "Type": "error"})
 		return
 	}
 	if !strings.HasPrefix(config.URL, "http://") && !strings.HasPrefix(config.URL, "https://") {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Webhook URL must use http:// or https:// scheme", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Webhook URL must use http:// or https:// scheme", "Type": "error"})
 		return
 	}
 	headers := make(map[string]string)
@@ -474,21 +278,21 @@ func (h *SettingsHandler) SaveWebhookSettings(c *gin.Context) {
 	}
 	config.Headers = headers
 	if err := svc.SaveWebhookConfig(&config); err != nil {
-		c.HTML(http.StatusInternalServerError, "smtp-message.html", gin.H{"Error": err.Error(), "Type": "error"})
+		c.HTML(http.StatusInternalServerError, "settings-message.html", gin.H{"Error": err.Error(), "Type": "error"})
 		return
 	}
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "Webhook settings saved successfully", "Type": "success"})
+	c.HTML(http.StatusOK, "settings-message.html", gin.H{"Message": "Webhook settings saved successfully", "Type": "success"})
 }
 
 func (h *SettingsHandler) TestWebhookConnection(c *gin.Context) {
 	svc := h.scopedService(c)
 	webhookURL := c.PostForm("webhook_url")
 	if webhookURL == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Webhook URL is required for testing", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Webhook URL is required for testing", "Type": "error"})
 		return
 	}
 	if !strings.HasPrefix(webhookURL, "http://") && !strings.HasPrefix(webhookURL, "https://") {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Webhook URL must use http:// or https:// scheme", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Webhook URL must use http:// or https:// scheme", "Type": "error"})
 		return
 	}
 
@@ -519,7 +323,7 @@ func (h *SettingsHandler) TestWebhookConnection(c *gin.Context) {
 	}()
 
 	if err := svc.SaveWebhookConfig(testConfig); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("Failed to save test config: %v", err), "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": fmt.Sprintf("Failed to save test config: %v", err), "Type": "error"})
 		return
 	}
 
@@ -532,20 +336,10 @@ func (h *SettingsHandler) TestWebhookConnection(c *gin.Context) {
 	}
 
 	if err := webhookService.SendWebhook(payload); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("Webhook test failed: %v", err), "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": fmt.Sprintf("Webhook test failed: %v", err), "Type": "error"})
 		return
 	}
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "Webhook 测试成功，请检查目标端点是否已收到通知。", "Type": "success"})
-}
-
-func (h *SettingsHandler) GetPushoverConfig(c *gin.Context) {
-	svc := h.scopedService(c)
-	config, err := svc.GetPushoverConfig()
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"configured": false})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"configured": true, "has_user_key": config.UserKey != "", "has_app_token": config.AppToken != ""})
+	c.HTML(http.StatusOK, "settings-message.html", gin.H{"Message": "Webhook 测试成功，请检查目标端点是否已收到通知。", "Type": "success"})
 }
 
 func (h *SettingsHandler) SaveTelegramSettings(c *gin.Context) {
@@ -555,14 +349,14 @@ func (h *SettingsHandler) SaveTelegramSettings(c *gin.Context) {
 		ChatID:   c.PostForm("telegram_chat_id"),
 	}
 	if config.BotToken == "" || config.ChatID == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Bot token and chat ID are required", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Bot token and chat ID are required", "Type": "error"})
 		return
 	}
 	if err := svc.SaveTelegramConfig(&config); err != nil {
-		c.HTML(http.StatusInternalServerError, "smtp-message.html", gin.H{"Error": err.Error(), "Type": "error"})
+		c.HTML(http.StatusInternalServerError, "settings-message.html", gin.H{"Error": err.Error(), "Type": "error"})
 		return
 	}
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "Telegram settings saved successfully", "Type": "success"})
+	c.HTML(http.StatusOK, "settings-message.html", gin.H{"Message": "Telegram settings saved successfully", "Type": "success"})
 }
 
 func (h *SettingsHandler) TestTelegramConnection(c *gin.Context) {
@@ -572,7 +366,7 @@ func (h *SettingsHandler) TestTelegramConnection(c *gin.Context) {
 		ChatID:   c.PostForm("telegram_chat_id"),
 	}
 	if config.BotToken == "" || config.ChatID == "" {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": "Bot token and chat ID are required for testing", "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": "Bot token and chat ID are required for testing", "Type": "error"})
 		return
 	}
 
@@ -591,15 +385,15 @@ func (h *SettingsHandler) TestTelegramConnection(c *gin.Context) {
 	}()
 
 	if err := svc.SaveTelegramConfig(&config); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("Failed to save test config: %v", err), "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": fmt.Sprintf("Failed to save test config: %v", err), "Type": "error"})
 		return
 	}
 
 	if err := telegramService.SendNotification("yyTrackr 测试消息", "这是一条来自 yyTrackr 的测试通知。如果你收到了这条消息，说明当前 Telegram 配置工作正常。"); err != nil {
-		c.HTML(http.StatusBadRequest, "smtp-message.html", gin.H{"Error": fmt.Sprintf("Failed to send Telegram notification: %v", err), "Type": "error"})
+		c.HTML(http.StatusBadRequest, "settings-message.html", gin.H{"Error": fmt.Sprintf("Failed to send Telegram notification: %v", err), "Type": "error"})
 		return
 	}
-	c.HTML(http.StatusOK, "smtp-message.html", gin.H{"Message": "Telegram 测试成功，请检查目标聊天是否已收到消息。", "Type": "success"})
+	c.HTML(http.StatusOK, "settings-message.html", gin.H{"Message": "Telegram 测试成功，请检查目标聊天是否已收到消息。", "Type": "success"})
 }
 
 func (h *SettingsHandler) GetTelegramConfig(c *gin.Context) {
@@ -626,60 +420,6 @@ func (h *SettingsHandler) GetTelegramConfig(c *gin.Context) {
 		"bot_token_preview": maskedToken,
 		"chat_id":           config.ChatID,
 	})
-}
-
-func (h *SettingsHandler) ToggleICalSubscription(c *gin.Context) {
-	svc := h.scopedService(c)
-	current := svc.IsICalSubscriptionEnabled()
-	newState := !current
-	if err := svc.SetICalSubscriptionEnabled(newState); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	var url string
-	if newState {
-		token, err := svc.GetOrGenerateICalToken()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		url = buildBaseURL(c, svc.GetBaseURL()) + "/ical/" + token
-	}
-	c.JSON(http.StatusOK, gin.H{"enabled": newState, "url": url})
-}
-
-func (h *SettingsHandler) GetICalSubscriptionURL(c *gin.Context) {
-	svc := h.scopedService(c)
-	enabled := svc.IsICalSubscriptionEnabled()
-	var url string
-	if enabled {
-		token, err := svc.GetOrGenerateICalToken()
-		if err == nil {
-			url = buildBaseURL(c, svc.GetBaseURL()) + "/ical/" + token
-		}
-	}
-	c.JSON(http.StatusOK, gin.H{"enabled": enabled, "url": url})
-}
-
-func (h *SettingsHandler) RegenerateICalToken(c *gin.Context) {
-	svc := h.scopedService(c)
-	token, err := svc.RegenerateICalToken()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	url := buildBaseURL(c, svc.GetBaseURL()) + "/ical/" + token
-	c.JSON(http.StatusOK, gin.H{"url": url})
-}
-
-func (h *SettingsHandler) UpdateBaseURL(c *gin.Context) {
-	svc := h.scopedService(c)
-	baseURL := c.PostForm("base_url")
-	if err := svc.SetBaseURL(baseURL); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"base_url": baseURL})
 }
 
 func (h *SettingsHandler) SetTheme(c *gin.Context) {

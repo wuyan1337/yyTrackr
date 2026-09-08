@@ -63,3 +63,11 @@ func joinNotificationLines(lines ...string) string {
 	}
 	return strings.Join(filtered, "\n")
 }
+
+func currencySymbolForSubscription(subscription *models.Subscription, settings *SettingsService) string {
+	preferred := settings.GetCurrency()
+	if subscription.OriginalCurrency != "" && subscription.OriginalCurrency != preferred {
+		return CurrencySymbolForCode(subscription.OriginalCurrency)
+	}
+	return settings.GetCurrencySymbol()
+}

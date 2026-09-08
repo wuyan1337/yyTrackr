@@ -4,7 +4,7 @@
 # This script demonstrates how to use the SubTrackr API with authentication
 
 API_KEY="sk_your_api_key_here"  # Replace with your actual API key
-BASE_URL="http://localhost:8080"
+SERVER_URL="http://localhost:8080"
 
 echo "SubTrackr API Test Script"
 echo "========================"
@@ -20,7 +20,7 @@ read
 # Test 1: Get all subscriptions
 echo "Test 1: Getting all subscriptions..."
 curl -s -H "Authorization: Bearer $API_KEY" \
-  "$BASE_URL/api/v1/subscriptions" | jq .
+  "$SERVER_URL/api/v1/subscriptions" | jq .
 
 echo ""
 echo "Press Enter to continue..."
@@ -29,7 +29,7 @@ read
 # Test 2: Get statistics
 echo "Test 2: Getting statistics..."
 curl -s -H "Authorization: Bearer $API_KEY" \
-  "$BASE_URL/api/v1/stats" | jq .
+  "$SERVER_URL/api/v1/stats" | jq .
 
 echo ""
 echo "Press Enter to continue..."
@@ -38,7 +38,7 @@ read
 # Test 3: Create a new subscription
 echo "Test 3: Creating a new subscription..."
 # Note: You'll need to replace category_id with an actual ID from your categories
-# You can get the list of categories with: curl -s "$BASE_URL/api/categories" | jq .
+# You can get the list of categories with: curl -s "$SERVER_URL/api/categories" | jq .
 curl -s -X POST \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
@@ -49,7 +49,7 @@ curl -s -X POST \
     "status": "Active",
     "category_id": 1
   }' \
-  "$BASE_URL/api/v1/subscriptions" | jq .
+  "$SERVER_URL/api/v1/subscriptions" | jq .
 
 echo ""
 echo "Press Enter to continue..."
@@ -58,7 +58,7 @@ read
 # Test 4: Export as JSON
 echo "Test 4: Exporting as JSON..."
 curl -s -H "Authorization: Bearer $API_KEY" \
-  "$BASE_URL/api/v1/export/json" | jq .
+  "$SERVER_URL/api/v1/export/json" | jq .
 
 echo ""
 echo "Test complete!"

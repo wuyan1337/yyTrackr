@@ -32,26 +32,14 @@ type SubscriptionHandler struct {
 	service         *service.SubscriptionService
 	settingsService *service.SettingsService
 	currencyService *service.CurrencyService
-	emailService    *service.EmailService
-	pushoverService *service.PushoverService
 	telegramService *service.TelegramService
 	webhookService  *service.WebhookService
 	logoService     *service.LogoService
 	devPreview      bool
 }
 
-func NewSubscriptionHandler(service *service.SubscriptionService, settingsService *service.SettingsService, currencyService *service.CurrencyService, emailService *service.EmailService, pushoverService *service.PushoverService, telegramService *service.TelegramService, webhookService *service.WebhookService, logoService *service.LogoService, devPreview bool) *SubscriptionHandler {
-	return &SubscriptionHandler{
-		service:         service,
-		settingsService: settingsService,
-		currencyService: currencyService,
-		emailService:    emailService,
-		pushoverService: pushoverService,
-		telegramService: telegramService,
-		webhookService:  webhookService,
-		logoService:     logoService,
-		devPreview:      devPreview,
-	}
+func NewSubscriptionHandler(subscriptions *service.SubscriptionService, settings *service.SettingsService, currency *service.CurrencyService, telegram *service.TelegramService, webhook *service.WebhookService, logos *service.LogoService, devPreview bool) *SubscriptionHandler {
+	return &SubscriptionHandler{service: subscriptions, settingsService: settings, currencyService: currency, telegramService: telegram, webhookService: webhook, logoService: logos, devPreview: devPreview}
 }
 
 func (h *SubscriptionHandler) scopedSubscriptionService(c *gin.Context) *service.SubscriptionService {
@@ -60,11 +48,6 @@ func (h *SubscriptionHandler) scopedSubscriptionService(c *gin.Context) *service
 
 func (h *SubscriptionHandler) scopedSettingsService(c *gin.Context) *service.SettingsService {
 	return h.settingsService.ForUser(middleware.CurrentUserID(c))
-}
-
-func (h *SubscriptionHandler) scopedNotificationServices(c *gin.Context) (*service.EmailService, *service.PushoverService, *service.TelegramService, *service.WebhookService) {
-	settingsService := h.scopedSettingsService(c)
-	return service.NewEmailService(settingsService), service.NewPushoverService(settingsService), service.NewTelegramService(settingsService), service.NewWebhookService(settingsService)
 }
 
 func (h *SubscriptionHandler) convertAmountForDisplay(amount float64, fromCurrency string, settingsService *service.SettingsService) float64 {
@@ -442,163 +425,24 @@ func (h *SubscriptionHandler) Calendar(c *gin.Context) {
 	c.Header("Pragma", "no-cache")
 	c.Header("Expires", "0")
 
-	// Build iCal subscription URL if enabled
-	icalSubscriptionEnabled := settingsService.IsICalSubscriptionEnabled()
-	var icalSubscriptionURL string
-	if icalSubscriptionEnabled {
-		token, err := settingsService.GetOrGenerateICalToken()
-		if err == nil {
-			icalSubscriptionURL = buildBaseURL(c, settingsService.GetBaseURL()) + "/ical/" + token
-		}
-	}
-
 	c.HTML(http.StatusOK, "calendar.html", gin.H{
-		"Title":                   "Calendar",
-		"CurrentPage":             "calendar",
-		"Year":                    year,
-		"Month":                   month,
-		"MonthName":               firstOfMonth.Format("January 2006"),
-		"EventsByDate":            template.JS(string(eventsJSON)),
-		"FirstOfMonth":            firstOfMonth,
-		"PrevMonth":               prevMonth,
-		"NextMonth":               nextMonth,
-		"CurrencySymbol":          settingsService.GetCurrencySymbol(),
-		"DarkMode":                settingsService.IsDarkModeEnabled(),
-		"ICalSubscriptionEnabled": icalSubscriptionEnabled,
-		"ICalSubscriptionURL":     icalSubscriptionURL,
+		"Title":          "Calendar",
+		"CurrentPage":    "calendar",
+		"Year":           year,
+		"Month":          month,
+		"MonthName":      firstOfMonth.Format("January 2006"),
+		"EventsByDate":   template.JS(string(eventsJSON)),
+		"FirstOfMonth":   firstOfMonth,
+		"PrevMonth":      prevMonth,
+		"NextMonth":      nextMonth,
+		"CurrencySymbol": settingsService.GetCurrencySymbol(),
+		"DarkMode":       settingsService.IsDarkModeEnabled(),
 	})
-}
-
-// generateICalContent generates iCal content for all active subscriptions
-// If forSubscription is true, adds subscription-friendly properties for calendar polling
-func (h *SubscriptionHandler) generateICalContent(subscriptionService *service.SubscriptionService, settingsService *service.SettingsService, forSubscription bool) (string, error) {
-	subscriptions, err := subscriptionService.GetAll()
-	if err != nil {
-		return "", err
-	}
-
-	icalContent := "BEGIN:VCALENDAR\r\n"
-	icalContent += "VERSION:2.0\r\n"
-	icalContent += "PRODID:-//SubTrackr//Subscription Renewals//EN\r\n"
-	icalContent += "CALSCALE:GREGORIAN\r\n"
-	icalContent += "METHOD:PUBLISH\r\n"
-
-	if forSubscription {
-		icalContent += "X-WR-CALNAME:SubTrackr Renewals\r\n"
-		icalContent += "REFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n"
-		icalContent += "X-PUBLISHED-TTL:PT1H\r\n"
-	}
-
-	now := time.Now()
-	for _, sub := range subscriptions {
-		if sub.RenewalDate != nil && sub.Status == "Active" {
-			dtStart := sub.RenewalDate.Format("20060102T150000Z")
-			dtEnd := sub.RenewalDate.Add(1 * time.Hour).Format("20060102T150000Z")
-			dtStamp := now.Format("20060102T150000Z")
-			uid := fmt.Sprintf("subtrackr-%d-%d@subtrackr", sub.ID, sub.RenewalDate.Unix())
-
-			summary := fmt.Sprintf("%s Renewal", sub.Name)
-			subCurrencySymbol := settingsService.GetCurrencySymbol()
-			if sub.OriginalCurrency != "" && sub.OriginalCurrency != settingsService.GetCurrency() {
-				subCurrencySymbol = service.CurrencySymbolForCode(sub.OriginalCurrency)
-			}
-			description := fmt.Sprintf("Subscription: %s\\nCost: %s%.2f\\nSchedule: %s", sub.Name, subCurrencySymbol, sub.Cost, sub.Schedule)
-			if sub.URL != "" {
-				description += fmt.Sprintf("\\nURL: %s", sub.URL)
-			}
-
-			icalContent += "BEGIN:VEVENT\r\n"
-			icalContent += fmt.Sprintf("UID:%s\r\n", uid)
-			icalContent += fmt.Sprintf("DTSTAMP:%s\r\n", dtStamp)
-			icalContent += fmt.Sprintf("DTSTART:%s\r\n", dtStart)
-			icalContent += fmt.Sprintf("DTEND:%s\r\n", dtEnd)
-			icalContent += fmt.Sprintf("SUMMARY:%s\r\n", summary)
-			icalContent += fmt.Sprintf("DESCRIPTION:%s\r\n", description)
-			icalContent += "STATUS:CONFIRMED\r\n"
-			icalContent += "SEQUENCE:0\r\n"
-
-			switch sub.Schedule {
-			case "Daily":
-				icalContent += "RRULE:FREQ=DAILY;INTERVAL=1\r\n"
-			case "Weekly":
-				icalContent += "RRULE:FREQ=WEEKLY;INTERVAL=1\r\n"
-			case "Monthly":
-				icalContent += "RRULE:FREQ=MONTHLY;INTERVAL=1\r\n"
-			case "Quarterly":
-				icalContent += "RRULE:FREQ=MONTHLY;INTERVAL=3\r\n"
-			case "Annual":
-				icalContent += "RRULE:FREQ=YEARLY;INTERVAL=1\r\n"
-			}
-
-			icalContent += "END:VEVENT\r\n"
-		}
-	}
-
-	icalContent += "END:VCALENDAR\r\n"
-	return icalContent, nil
-}
-
-// ExportICal generates and downloads an iCal file with all subscription renewal dates
-func (h *SubscriptionHandler) ExportICal(c *gin.Context) {
-	icalContent, err := h.generateICalContent(h.scopedSubscriptionService(c), h.scopedSettingsService(c), false)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.Header("Content-Type", "text/calendar; charset=utf-8")
-	c.Header("Content-Disposition", `attachment; filename="subtrackr-renewals.ics"`)
-	c.Data(http.StatusOK, "text/calendar; charset=utf-8", []byte(icalContent))
-}
-
-// ServeICalSubscription serves iCal content for calendar subscription (public, token-validated)
-func (h *SubscriptionHandler) ServeICalSubscription(c *gin.Context) {
-	token := c.Param("token")
-	userID, err := h.settingsService.FindUserIDByICalToken(token)
-	if err != nil || userID == 0 {
-		c.String(http.StatusUnauthorized, "Invalid token")
-		return
-	}
-
-	settingsService := h.settingsService.ForUser(userID)
-	if !settingsService.IsICalSubscriptionEnabled() {
-		c.String(http.StatusNotFound, "iCal subscription is not enabled")
-		return
-	}
-
-	icalContent, err := h.generateICalContent(h.service.ForUser(userID), settingsService, true)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Failed to generate calendar")
-		return
-	}
-
-	c.Header("Content-Type", "text/calendar; charset=utf-8")
-	c.Data(http.StatusOK, "text/calendar; charset=utf-8", []byte(icalContent))
 }
 
 // Settings renders the settings page
 func (h *SubscriptionHandler) Settings(c *gin.Context) {
 	settingsService := h.scopedSettingsService(c)
-	// Load SMTP config if available (without password)
-	var smtpConfig *models.SMTPConfig
-	smtpConfigured := false
-	config, err := settingsService.GetSMTPConfig()
-	if err == nil && config != nil {
-		// Don't include password in template
-		config.Password = ""
-		smtpConfig = config
-		smtpConfigured = true
-	}
-
-	// Load Pushover config if available
-	var pushoverConfig *models.PushoverConfig
-	pushoverConfigured := false
-	pushoverCfg, err := settingsService.GetPushoverConfig()
-	if err == nil && pushoverCfg != nil {
-		pushoverConfig = pushoverCfg
-		pushoverConfigured = true
-	}
-
 	// Load Telegram config if available
 	var telegramConfig *models.TelegramConfig
 	telegramConfigured := false
@@ -625,16 +469,6 @@ func (h *SubscriptionHandler) Settings(c *gin.Context) {
 		}
 	}
 
-	// Build iCal subscription URL if enabled
-	icalSubscriptionEnabled := settingsService.IsICalSubscriptionEnabled()
-	var icalSubscriptionURL string
-	if icalSubscriptionEnabled {
-		token, err := settingsService.GetOrGenerateICalToken()
-		if err == nil {
-			icalSubscriptionURL = buildBaseURL(c, settingsService.GetBaseURL()) + "/ical/" + token
-		}
-	}
-
 	c.HTML(http.StatusOK, "settings.html", gin.H{
 		"Title":                    "Settings",
 		"CurrentPage":              "settings",
@@ -642,8 +476,6 @@ func (h *SubscriptionHandler) Settings(c *gin.Context) {
 		"CurrencySymbol":           settingsService.GetCurrencySymbol(),
 		"RenewalReminders":         settingsService.GetBoolSettingWithDefault("renewal_reminders", false),
 		"HighCostAlerts":           settingsService.GetBoolSettingWithDefault("high_cost_alerts", true),
-		"PushoverConfig":           pushoverConfig,
-		"PushoverConfigured":       pushoverConfigured,
 		"TelegramConfig":           telegramConfig,
 		"TelegramConfigured":       telegramConfigured,
 		"HighCostThreshold":        settingsService.GetFloatSettingWithDefault("high_cost_threshold", 50.0),
@@ -652,11 +484,6 @@ func (h *SubscriptionHandler) Settings(c *gin.Context) {
 		"CancellationReminderDays": settingsService.GetIntSettingWithDefault("cancellation_reminder_days", 7),
 		"DarkMode":                 settingsService.IsDarkModeEnabled(),
 		"Version":                  version.GetVersion(),
-		"SMTPConfig":               smtpConfig,
-		"SMTPConfigured":           smtpConfigured,
-		"ICalSubscriptionEnabled":  icalSubscriptionEnabled,
-		"ICalSubscriptionURL":      icalSubscriptionURL,
-		"BaseURL":                  settingsService.GetBaseURL(),
 		"Currencies":               service.GetAvailableCurrencies(),
 		"DateFormat":               settingsService.GetDateFormat(),
 		"WebhookConfig":            webhookConfig,
@@ -770,21 +597,12 @@ func (h *SubscriptionHandler) CreateSubscription(c *gin.Context) {
 		return
 	}
 
-	// Send high-cost alert email and Pushover notification if applicable
 	if h.isHighCostWithCurrency(created, settingsService) {
-		emailService, pushoverService, telegramService, webhookService := h.scopedNotificationServices(c)
-		// Reload subscription with category for email template
+		telegramService := service.NewTelegramService(h.scopedSettingsService(c))
+		webhookService := service.NewWebhookService(h.scopedSettingsService(c))
+		// Reload subscription with category for notification details
 		subscriptionWithCategory, err := subscriptionService.GetByID(created.ID)
 		if err == nil && subscriptionWithCategory != nil {
-			if err := emailService.SendHighCostAlert(subscriptionWithCategory); err != nil {
-				// Log error but don't fail the request
-				log.Printf("Failed to send high-cost alert email: %v", err)
-			}
-			// Send Pushover notification
-			if err := pushoverService.SendHighCostAlert(subscriptionWithCategory); err != nil {
-				// Log error but don't fail the request
-				log.Printf("Failed to send high-cost alert Pushover notification: %v", err)
-			}
 			// Send Telegram notification
 			if err := telegramService.SendHighCostAlert(subscriptionWithCategory); err != nil {
 				log.Printf("Failed to send high-cost alert Telegram notification: %v", err)
@@ -920,22 +738,13 @@ func (h *SubscriptionHandler) UpdateSubscription(c *gin.Context) {
 		return
 	}
 
-	// Send high-cost alert email and Pushover notification if subscription became high-cost (wasn't before, but is now)
 	if updated != nil && !wasHighCost && h.isHighCostWithCurrency(updated, settingsService) {
-		emailService, pushoverService, telegramService, webhookService := h.scopedNotificationServices(c)
-		// Reload subscription with category for email template
+		telegramService := service.NewTelegramService(h.scopedSettingsService(c))
+		webhookService := service.NewWebhookService(h.scopedSettingsService(c))
+		// Reload subscription with category for notification details
 		subscriptionWithCategory, err := subscriptionService.GetByID(updated.ID)
 		if err == nil && subscriptionWithCategory != nil {
-			// Send email notification
-			if err := emailService.SendHighCostAlert(subscriptionWithCategory); err != nil {
-				// Log error but don't fail the request
-				log.Printf("Failed to send high-cost alert email: %v", err)
-			}
-			// Send Pushover notification
-			if err := pushoverService.SendHighCostAlert(subscriptionWithCategory); err != nil {
-				// Log error but don't fail the request
-				log.Printf("Failed to send high-cost alert Pushover notification: %v", err)
-			}
+			// Send notifications notification
 			// Send Telegram notification
 			if err := telegramService.SendHighCostAlert(subscriptionWithCategory); err != nil {
 				log.Printf("Failed to send high-cost alert Telegram notification: %v", err)
@@ -1083,58 +892,6 @@ func (h *SubscriptionHandler) ExportJSON(c *gin.Context) {
 		"subscriptions": subscriptions,
 		"exported_at":   time.Now(),
 		"total_count":   len(subscriptions),
-	})
-}
-
-// BackupData creates a complete backup of all data
-func (h *SubscriptionHandler) BackupData(c *gin.Context) {
-	subscriptionService := h.scopedSubscriptionService(c)
-	subscriptions, err := subscriptionService.GetAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	stats, err := subscriptionService.GetStats()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	backup := gin.H{
-		"version":       "1.0",
-		"backup_date":   time.Now(),
-		"subscriptions": subscriptions,
-		"stats":         stats,
-		"total_count":   len(subscriptions),
-	}
-
-	c.Header("Content-Type", "application/json")
-	c.Header("Content-Disposition", "attachment; filename=subtrackr-backup.json")
-	c.JSON(http.StatusOK, backup)
-}
-
-// ClearAllData removes all subscription data
-func (h *SubscriptionHandler) ClearAllData(c *gin.Context) {
-	subscriptionService := h.scopedSubscriptionService(c)
-	subscriptions, err := subscriptionService.GetAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Delete all subscriptions
-	for _, sub := range subscriptions {
-		err := subscriptionService.Delete(sub.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to delete subscription %d: %v", sub.ID, err)})
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":       "All subscription data has been cleared",
-		"deleted_count": len(subscriptions),
 	})
 }
 

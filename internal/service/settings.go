@@ -2,7 +2,6 @@ package service
 
 import (
 	"crypto/rand"
-	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -57,26 +56,6 @@ func (s *SettingsService) GetGlobal(key string) (string, error) {
 
 func (s *SettingsService) DeleteGlobal(key string) error {
 	return s.repo.DeleteGlobal(key)
-}
-
-func (s *SettingsService) SaveSMTPConfig(config *models.SMTPConfig) error {
-	data, err := json.Marshal(config)
-	if err != nil {
-		return err
-	}
-	return s.set("smtp_config", string(data))
-}
-
-func (s *SettingsService) GetSMTPConfig() (*models.SMTPConfig, error) {
-	data, err := s.get("smtp_config")
-	if err != nil {
-		return nil, err
-	}
-	var config models.SMTPConfig
-	if err := json.Unmarshal([]byte(data), &config); err != nil {
-		return nil, err
-	}
-	return &config, nil
 }
 
 func (s *SettingsService) SaveUIPersonalizationConfig(config *models.UIPersonalizationConfig) error {
@@ -310,90 +289,6 @@ func (s *SettingsService) GetOrGenerateSessionSecret() (string, error) {
 	}
 
 	return secret, nil
-}
-
-func (s *SettingsService) GetBaseURL() string {
-	baseURL, err := s.get("base_url")
-	if err != nil {
-		return ""
-	}
-	return baseURL
-}
-
-func (s *SettingsService) SetBaseURL(baseURL string) error {
-	return s.set("base_url", baseURL)
-}
-
-func (s *SettingsService) IsICalSubscriptionEnabled() bool {
-	return s.GetBoolSettingWithDefault("ical_subscription_enabled", false)
-}
-
-func (s *SettingsService) SetICalSubscriptionEnabled(enabled bool) error {
-	return s.SetBoolSetting("ical_subscription_enabled", enabled)
-}
-
-func (s *SettingsService) GetOrGenerateICalToken() (string, error) {
-	token, err := s.get("ical_subscription_token")
-	if err == nil && token != "" {
-		return token, nil
-	}
-
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	token = base64.URLEncoding.EncodeToString(bytes)
-
-	if err := s.set("ical_subscription_token", token); err != nil {
-		return "", err
-	}
-	return token, nil
-}
-
-func (s *SettingsService) RegenerateICalToken() (string, error) {
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	token := base64.URLEncoding.EncodeToString(bytes)
-
-	if err := s.set("ical_subscription_token", token); err != nil {
-		return "", err
-	}
-	return token, nil
-}
-
-func (s *SettingsService) ValidateICalToken(token string) bool {
-	storedToken, err := s.get("ical_subscription_token")
-	if err != nil || storedToken == "" {
-		return false
-	}
-	return subtle.ConstantTimeCompare([]byte(storedToken), []byte(token)) == 1
-}
-
-func (s *SettingsService) FindUserIDByICalToken(token string) (uint, error) {
-	return s.repo.FindUserIDByKeyValue("ical_subscription_token", token)
-}
-
-func (s *SettingsService) SavePushoverConfig(config *models.PushoverConfig) error {
-	data, err := json.Marshal(config)
-	if err != nil {
-		return err
-	}
-	return s.set("pushover_config", string(data))
-}
-
-func (s *SettingsService) GetPushoverConfig() (*models.PushoverConfig, error) {
-	data, err := s.get("pushover_config")
-	if err != nil {
-		return nil, err
-	}
-
-	var config models.PushoverConfig
-	if err := json.Unmarshal([]byte(data), &config); err != nil {
-		return nil, err
-	}
-	return &config, nil
 }
 
 func (s *SettingsService) SaveTelegramConfig(config *models.TelegramConfig) error {

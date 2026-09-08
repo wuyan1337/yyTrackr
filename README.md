@@ -9,8 +9,8 @@
 - HTMX + 服务端模板页面
 - 支持账号注册、登录和多用户隔离
 - 支持 Dashboard / Subscriptions / Analytics / Calendar / Settings
-- 支持 Email / Telegram / Pushover / Webhook 通知
-- 支持 iCal 导出、CSV / JSON 导出
+- 支持 Telegram / Webhook 通知
+- 支持 CSV / JSON 导出
 - 适合跑在单机 VPS 或个人服务器上
 
 ## 当前运行方式
