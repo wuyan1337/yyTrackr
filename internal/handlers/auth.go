@@ -23,6 +23,17 @@ func NewAuthHandler(userService *service.UserService, settingsService *service.S
 	}
 }
 
+// parseRememberMe accepts native checkbox and explicit boolean form values.
+// Missing, false and unknown values must never opt users into a long session.
+func parseRememberMe(value string) bool {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "on", "true", "1":
+		return true
+	default:
+		return false
+	}
+}
+
 func isValidRedirect(redirect string) bool {
 	if len(redirect) > 2048 {
 		return false
@@ -51,7 +62,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 	confirmPassword := c.PostForm("confirm_password")
-	rememberMe := c.PostForm("remember_me") == "on"
+	rememberMe := parseRememberMe(c.PostForm("remember_me"))
 
 	if password != confirmPassword {
 		renderAuthError(c, "两次输入的密码不一致")
@@ -129,7 +140,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	identifier := c.PostForm("username")
 	password := c.PostForm("password")
-	rememberMe := c.PostForm("remember_me") == "on"
+	rememberMe := parseRememberMe(c.PostForm("remember_me"))
 	redirect := c.PostForm("redirect")
 
 	if redirect == "" || !isValidRedirect(redirect) {
