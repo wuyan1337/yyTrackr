@@ -49,3 +49,5 @@
  .settings-page #api-docs :is(td, th) { padding: 9px 6px; font-size: 12px; }
  .settings-page #api-docs th:first-child { width: 60px; }
 }
+
+@media(max-width:640px){body.settings-page main .pt-8{padding-top:20px!important}body.settings-page main .mb-4{margin-bottom:10px!important}body.settings-page main .p-6,body.settings-page main .p-8{padding:16px!important}body.settings-page main .space-y-8> :not([hidden])~:not([hidden]){margin-top:20px!important}}

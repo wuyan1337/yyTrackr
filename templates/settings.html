@@ -29,7 +29,7 @@
     </script>
     <link rel="stylesheet" href="/static/css/themes.css">
     <link rel="stylesheet" href="/static/css/app-ui.css?v=20260908-1">
-    <link rel="stylesheet" href="/static/css/settings.css?v=20260908-2">
+    <link rel="stylesheet" href="/static/css/settings.css?v=20260908-3">
     <script src="/static/js/themes.js"></script>
     <script src="/static/js/mobile-menu.js"></script>
 </head>
@@ -433,21 +433,11 @@
                 <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">货币</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">选择用于显示订阅费用的默认货币</p>
                 
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <select id="default-currency" name="currency" aria-label="默认货币" hx-post="/api/settings/currency" hx-trigger="change" hx-swap="none" class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-800 text-gray-100">
                     {{range .Currencies}}
-                    <label class="flex items-center cursor-pointer">
-                        <input type="radio"
-                               name="currency"
-                               value="{{.Code}}"
-                               {{if eq .Code $.Currency}}checked{{end}}
-                               hx-post="/api/settings/currency"
-                               hx-trigger="change"
-                               hx-vals='{"currency": "{{.Code}}"}'
-                               class="mr-2 text-primary focus:ring-primary">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{.Symbol}} {{.Code}} ({{.Name}})</span>
-                    </label>
+                    <option value="{{.Code}}" {{if eq .Code $.Currency}}selected{{end}}>{{.Symbol}} {{.Code}} · {{.Name}}</option>
                     {{end}}
-                </div>
+                </select>
 
                 <div id="currency-message" class="mt-2"></div>
             </div>
