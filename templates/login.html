@@ -4,7 +4,7 @@
     <script src="/static/js/theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#37889b">
+    <meta name="theme-color" content="#101c29">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.json">
@@ -12,67 +12,56 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/css/themes.css">
+    <link rel="stylesheet" href="/static/css/login.css?v=20260908-1">
     <script src="/static/js/auth-background.js" defer></script>
+    <script src="/static/js/login.js?v=20260908-1" defer></script>
 </head>
-<body class="bg-gray-50">
-    <div class="login-shell auth-stage">
-        <section class="login-art p-8 lg:p-12 flex flex-col justify-between auth-stage__media">
-            <div class="auth-stage__slides" data-auth-slideshow>
-                <div class="auth-stage__slide is-active" style="background-image:url('/static/images/wp/atri-my-dear-moments-anime-review-a-submerged-tale-of-human-android-connection-3317236.webp')"></div>
-                <div class="auth-stage__slide" style="background-image:url('/static/images/wp/atri_pv2screenshot.webp')"></div>
-                <div class="auth-stage__slide" style="background-image:url('/static/images/wp/unnamed.png')"></div>
-                <div class="auth-stage__slide" style="background-image:url('/static/images/wp/unnamed.webp')"></div>
-            </div>
-            <div class="auth-stage__overlay"></div>
-            <div class="relative z-10">
-                <span class="anime-badge">账户登录</span>
-                <h1 class="hero-title mt-5 max-w-xl">登录订阅控制台</h1>
-                <p class="hero-subtitle">登录后才可访问所有页面与数据。当前实例已启用账户隔离，不同账户内容互不共享。</p>
-            </div>
+<body class="signin-page">
+    <div class="signin-backdrop" aria-hidden="true">
+        <div class="auth-stage__slides" data-auth-slideshow>
+            <div class="auth-stage__slide is-active" style="background-image:url('/static/images/wp/atri-my-dear-moments-anime-review-a-submerged-tale-of-human-android-connection-3317236.webp')"></div>
+            <div class="auth-stage__slide" style="background-image:url('/static/images/wp/atri_pv2screenshot.webp')"></div>
+            <div class="auth-stage__slide" style="background-image:url('/static/images/wp/unnamed.png')"></div>
+            <div class="auth-stage__slide" style="background-image:url('/static/images/wp/unnamed.webp')"></div>
+        </div>
+    </div>
+    <header class="signin-brand"><img src="/static/images/logo.svg" alt="" width="30" height="30"><span>SubTrackr</span><span class="signin-brand-note">订阅管理</span></header>
+    <main class="signin-layout">
+        <section class="signin-intro" aria-labelledby="intro-title">
+            <span class="signin-eyebrow">LESS TO MANAGE. MORE TO ENJOY.</span>
+            <h1 id="intro-title">让每一份订阅，<br>都心中有数。</h1>
+            <p>整理日常订阅，留点时间给喜欢的生活。</p>
+            <div class="signin-caption"><span></span> 你的订阅，只属于你。</div>
         </section>
-
-        <section class="login-panel">
-            <div class="login-card glass-card">
-                <div class="text-center mb-8">
-                    <img src="/static/images/logo.svg" alt="SubTrackr" class="h-12 w-auto mx-auto mb-5">
-                    <h2 class="text-3xl font-bold text-white">账户登录</h2>
-                    <p class="mt-2 text-sm text-slate-300">输入用户名和密码以继续。</p>
-                </div>
-
-                <form hx-post="/api/auth/login" hx-target="#login-error" hx-swap="innerHTML">
+        <section class="signin-form-section" aria-labelledby="signin-title">
+            <div class="signin-form-wrap">
+                <span class="signin-eyebrow">WELCOME BACK</span>
+                <h2 id="signin-title">欢迎回来</h2>
+                <p class="signin-description">登录，继续管理你的订阅。</p>
+                <form hx-post="/api/auth/login" hx-target="#login-error" hx-swap="innerHTML" hx-disabled-elt="find button[type='submit']">
                     <input type="hidden" name="redirect" value="{{.Redirect}}">
-                    <div class="space-y-4">
-                        <div>
-                            <label for="username" class="block text-sm font-medium text-slate-200 mb-2">用户名</label>
-                            <input type="text" id="username" name="username" required autofocus class="login-field">
-                        </div>
-
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-slate-200 mb-2">密码</label>
-                            <input type="password" id="password" name="password" required class="login-field">
-                        </div>
-
-                        <label class="flex items-center gap-3 text-sm text-slate-300">
-                            <input type="checkbox" id="remember_me" name="remember_me" class="h-4 w-4 rounded border-white/20 bg-white/10 text-pink-400 focus:ring-pink-400">
-                            <span>30 天内保持登录</span>
-                        </label>
-
-                        <div id="login-error" class="min-h-[20px]">
-                            {{if .Error}}<div class="bg-red-50 border border-red-200 rounded-lg p-3"><p class="text-sm text-red-700">{{.Error}}</p></div>{{end}}
-                        </div>
-
-                        <button type="submit" class="glow-button w-full rounded-xl px-4 py-3 font-semibold text-white">
-                            登录
-                        </button>
-
-                        <div class="text-center text-sm text-slate-300">
-                            还没有账户？
-                            <a href="/register" class="text-pink-200 hover:text-white">立即注册</a>
+                    <div class="signin-control">
+                        <label for="username">用户名</label>
+                        <div class="signin-input-wrap" data-spotlight>
+                            <input type="text" id="username" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="输入用户名">
                         </div>
                     </div>
+                    <div class="signin-control">
+                        <label for="password">密码</label>
+                        <div class="signin-input-wrap" data-spotlight>
+                            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="输入密码">
+                            <button class="signin-reveal" type="button" aria-label="显示密码" aria-controls="password" aria-pressed="false"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                        </div>
+                    </div>
+                    <label class="signin-remember" for="remember_me"><input type="checkbox" id="remember_me" name="remember_me"><span>30 天内保持登录</span></label>
+                    <div id="login-error" role="alert" aria-live="polite">{{if .Error}}<p>{{.Error}}</p>{{end}}</div>
+                    <button type="submit" class="signin-submit"><span>登录</span><span aria-hidden="true">→</span></button>
+                    <p class="signin-register">还没有账户？ <a href="/register">立即注册 <span aria-hidden="true">↗</span></a></p>
                 </form>
+                <p class="signin-privacy"><svg width="13" height="14" viewBox="0 0 16 18" fill="none" stroke="currentColor" aria-hidden="true"><path d="m8 1 6 3v5c0 4-6 8-6 8S2 13 2 9V4l6-3Z"/><path d="m5 9 2 2 4-4"/></svg>账户独立 · 数据私享</p>
             </div>
         </section>
-    </div>
+    </main>
+    <footer class="signin-footer">SubTrackr <span>把订阅，理简单。</span></footer>
 </body>
 </html>
