@@ -1,0 +1,18 @@
+/* Shared navigation treatment for authenticated pages. Keep template DOM and behavior intact. */
+.anime-app-shell > header, .app-ui > header { background:rgba(255,255,255,.92); border-bottom:1px solid #e5e7eb; box-shadow:0 4px 18px rgba(15,23,42,.06); position:relative; z-index:20; }
+.anime-app-shell > header > div, .app-ui > header > div { min-height:52px; }
+.anime-app-shell header img, .app-ui header img { height:2rem; width:auto; }
+.anime-app-shell header nav a, .app-ui header nav a { border-radius:.65rem; color:#4b5563; font-size:.875rem; font-weight:600; padding:.6rem .8rem; transition:background .15s,color .15s; }
+.anime-app-shell header nav a:hover, .app-ui header nav a:hover { background:#f3f4f6; color:#111827; }
+.anime-app-shell header nav a[aria-current="page"], .app-ui header nav a[aria-current="page"] { background:#ede9fe; color:#6d28d9; }
+#mobile-menu { z-index:50; }
+#mobile-menu > nav, #mobile-menu nav.fixed { background:#fff; box-shadow:10px 0 30px rgba(15,23,42,.16); }
+#mobile-menu nav a { border-radius:.65rem; color:#374151; font-size:.95rem; font-weight:600; }
+#mobile-menu nav a:hover, #mobile-menu nav a[aria-current="page"] { background:#ede9fe; color:#6d28d9; }
+#mobile-menu button { color:#374151; }
+@media (prefers-color-scheme: dark) {
+ .anime-app-shell > header, .app-ui > header { background:rgba(31,41,55,.95); border-color:#374151; }
+ .anime-app-shell header nav a, .app-ui header nav a, #mobile-menu nav a, #mobile-menu button { color:#d1d5db; }
+ .anime-app-shell header nav a:hover, .app-ui header nav a:hover, #mobile-menu nav a:hover { background:#374151; color:#fff; }
+ #mobile-menu > nav, #mobile-menu nav.fixed { background:#1f2937; }
+}

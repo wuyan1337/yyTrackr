@@ -1,0 +1,57 @@
+/* Internal UI only. Auth pages deliberately do not load this stylesheet. */
+.app-ui {
+    --app-bg: #141618; --app-surface: #1c1f22; --app-raised: #25292d;
+    --app-border: #383d42; --app-text: #eceeef; --app-muted: #adb4bb;
+    color-scheme: dark;
+    background: var(--app-bg) !important; color: var(--app-text) !important;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+.app-ui::before, .app-ui::after, .app-ui .glow-button::after { content: none !important; }
+.app-ui.has-custom-bg { background: linear-gradient(#141618cc, #141618e6), var(--personalization-bg-image) center / cover fixed !important; }
+.app-ui header, .app-ui .anime-header { background: var(--app-surface) !important; border-color: var(--app-border) !important; backdrop-filter: none; }
+.app-ui .glass-card, .app-ui .glass-card-soft, .app-ui .hero-banner,
+.app-ui .control-panel, .app-ui .subscription-card, .app-ui .action-tile {
+    background: var(--app-surface) !important; border: 1px solid var(--app-border);
+    border-radius: 12px; box-shadow: none !important; backdrop-filter: none;
+}
+.app-ui .hero-banner { padding: 24px; }
+.app-ui .hero-title { font-size: clamp(1.5rem, 2.4vw, 2.2rem); line-height: 1.3; font-weight: 650; }
+.app-ui .hero-title, .app-ui .metric-value, .app-ui .section-heading-title { color: var(--app-text); }
+.app-ui .hero-subtitle, .app-ui .metric-copy, .app-ui .metric-label, .app-ui .section-heading-copy { color: var(--app-muted); }
+.app-ui .anime-badge { background: var(--app-raised); color: var(--app-muted); border-color: var(--app-border); }
+.app-ui .glow-button, .app-ui .bg-primary { background: #475c69 !important; color: #fff !important; box-shadow: none !important; }
+.app-ui [class*="bg-primary/"], .app-ui nav [aria-current="page"] { background: var(--app-raised) !important; color: var(--app-text) !important; }
+.app-ui [class*="text-primary"], .app-ui [class*="text-pink-"], .app-ui [class*="text-violet-"] { color: #c7d6df !important; }
+.app-ui [class*="bg-gradient-"] { background-image: none !important; background-color: #78909d !important; }
+.app-ui .bg-white, .app-ui .bg-gray-800, .app-ui [class~="dark:bg-gray-800"] { background-color: var(--app-surface) !important; }
+.app-ui .bg-gray-50, .app-ui .bg-gray-100, .app-ui [class~="dark:bg-gray-900"] { background-color: var(--app-bg) !important; }
+.app-ui [class*="border-gray-"] { border-color: var(--app-border) !important; }
+.app-ui input:not([type="checkbox"]):not([type="radio"]), .app-ui select, .app-ui textarea {
+    background: var(--app-bg) !important; color: var(--app-text) !important; border-color: var(--app-border) !important; max-width: 100%;
+}
+.app-ui :is(button, a, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid #b4c9d6; outline-offset: 3px; }
+.app-ui :is(.metric-card, .subscription-card, .action-tile, .glow-button):hover { transform: none; filter: none; border-color: #68737d; }
+.app-ui main, .app-ui main > div, .app-ui .glass-card { min-width: 0; }
+.app-ui .calendar-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.app-ui .calendar-scroll > .grid { min-width: 770px; }
+.app-ui .calendar-day { min-width: 0; min-height: 112px; padding: 8px; background: var(--app-surface); border-right: 1px solid var(--app-border); border-bottom: 1px solid var(--app-border); }
+.app-ui .calendar-day-has-events { background: #202529; }
+.app-ui .calendar-outside { background: #17191b; }
+.app-ui .calendar-outside > div { color: #889198 !important; }
+.app-ui .calendar-date { font-size: 14px; font-weight: 600; color: var(--app-text); margin-bottom: 6px; }
+.app-ui .calendar-event { min-height: 36px; background: #303a41; color: #e1e8ec; border: 1px solid #46535d; }
+.app-ui .calendar-event:hover { background: #404d56; }
+.app-ui #mobile-menu { z-index: 100; }
+.app-ui #mobile-menu-button { min-width: 44px; min-height: 44px; }
+@media (max-width: 767px) {
+    .app-ui .hero-banner, .app-ui .glass-card.p-6 { padding: 16px; }
+    .app-ui .stats-grid, .app-ui .hero-grid { grid-template-columns: minmax(0, 1fr); }
+    .app-ui .hero-title { overflow-wrap: anywhere; }
+    .app-ui main .flex.justify-between { flex-wrap: wrap; gap: 12px; }
+    .app-ui #modal > div { max-width: calc(100vw - 24px); margin: 12px; }
+    .app-ui input, .app-ui select, .app-ui textarea { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .app-ui *, .app-ui *::before, .app-ui *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+.app-ui.reduce-motion *, .app-ui.reduce-motion *::before, .app-ui.reduce-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
