@@ -151,22 +151,6 @@ func buildDiscordWebhookPayload(payload *WebhookPayload) *discordWebhookPayload 
 		content = payload.Title + "\n" + payload.Message
 	}
 
-	if payload.Subscription != nil {
-		content += fmt.Sprintf(
-			"\n\n订阅：%s\n费用：%s%.2f / %s",
-			payload.Subscription.Name,
-			payload.Subscription.CurrencySymbol,
-			payload.Subscription.Cost,
-			payload.Subscription.Schedule,
-		)
-		if payload.Subscription.RenewalDate != "" {
-			content += "\n续费日期：" + payload.Subscription.RenewalDate
-		}
-		if payload.Subscription.CancellationDate != "" {
-			content += "\n到期日期：" + payload.Subscription.CancellationDate
-		}
-	}
-
 	return &discordWebhookPayload{
 		Username: "yyTrackr",
 		Content:  content,
@@ -195,6 +179,7 @@ func (w *WebhookService) SendHighCostAlert(subscription *models.Subscription) er
 		Timestamp:    time.Now().UTC().Format(time.RFC3339),
 	}
 
+	payload.Title, payload.Message = buildNotificationMessage(payload.Event, subscription, w.settingsService, 0)
 	return w.SendWebhook(payload)
 }
 
@@ -207,10 +192,11 @@ func (w *WebhookService) SendRenewalReminder(subscription *models.Subscription, 
 	payload := &WebhookPayload{
 		Event:        "renewal_reminder",
 		Title:        fmt.Sprintf("续费提醒｜%s", subscription.Name),
-		Message:      joinNotificationLines(formatReminderDetail(daysUntilRenewal, "续费")+"。", joinNotificationLines(buildNotificationLines(subscription, w.settingsService)...)),
+		Message:      "",
 		Subscription: subscriptionToWebhook(subscription, w.settingsService),
 		Timestamp:    time.Now().UTC().Format(time.RFC3339),
 	}
+	payload.Title, payload.Message = buildNotificationMessage(payload.Event, subscription, w.settingsService, daysUntilRenewal)
 
 	return w.SendWebhook(payload)
 }
@@ -224,10 +210,11 @@ func (w *WebhookService) SendCancellationReminder(subscription *models.Subscript
 	payload := &WebhookPayload{
 		Event:        "cancellation_reminder",
 		Title:        fmt.Sprintf("到期提醒｜%s", subscription.Name),
-		Message:      joinNotificationLines(formatReminderDetail(daysUntilCancellation, "到期")+"。", joinNotificationLines(buildNotificationLines(subscription, w.settingsService)...)),
+		Message:      "",
 		Subscription: subscriptionToWebhook(subscription, w.settingsService),
 		Timestamp:    time.Now().UTC().Format(time.RFC3339),
 	}
+	payload.Title, payload.Message = buildNotificationMessage(payload.Event, subscription, w.settingsService, daysUntilCancellation)
 
 	return w.SendWebhook(payload)
 }

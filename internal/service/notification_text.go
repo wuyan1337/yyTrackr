@@ -64,6 +64,30 @@ func joinNotificationLines(lines ...string) string {
 	return strings.Join(filtered, "\n")
 }
 
+func buildNotificationMessage(event string, subscription *models.Subscription, settings *SettingsService, days int) (string, string) {
+	detail := ""
+	date := ""
+	switch event {
+	case "renewal_reminder":
+		detail = formatReminderDetail(days, "续费") + "。"
+		if subscription.RenewalDate != nil {
+			date = "续费日期：" + subscription.RenewalDate.Format(settings.GetGoDateFormatLong())
+		}
+	case "cancellation_reminder":
+		detail = formatReminderDetail(days, "到期") + "。"
+		if subscription.CancellationDate != nil {
+			date = "到期日期：" + subscription.CancellationDate.Format(settings.GetGoDateFormatLong())
+		}
+	case "high_cost_alert":
+		detail = "检测到高价订阅，请确认是否需要保留。"
+	}
+	message := joinNotificationLines(detail, joinNotificationLines(buildNotificationLines(subscription, settings)...), date)
+	title := map[string]string{"renewal_reminder": "续费提醒｜", "cancellation_reminder": "到期提醒｜", "high_cost_alert": "高价订阅提醒"}[event]
+	if title != "高价订阅提醒" {
+		title += subscription.Name
+	}
+	return title, message
+}
 func currencySymbolForSubscription(subscription *models.Subscription, settings *SettingsService) string {
 	preferred := settings.GetCurrency()
 	if subscription.OriginalCurrency != "" && subscription.OriginalCurrency != preferred {
