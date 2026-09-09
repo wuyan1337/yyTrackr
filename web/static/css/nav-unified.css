@@ -16,3 +16,23 @@
  .anime-app-shell header nav a:hover, .app-ui header nav a:hover, #mobile-menu nav a:hover { background:#374151; color:#fff; }
  #mobile-menu > nav, #mobile-menu nav.fixed { background:#1f2937; }
 }
+
+/* Final legacy reset: identical shell for every authenticated page. */
+html, body.app-ui { margin: 0 !important; padding: 0 !important; }
+body.app-ui > div.flex.flex-col.min-h-screen > header,
+body.app-ui > div.flex.flex-col.min-h-screen > .anime-header {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 64px;
+  height: 64px;
+  padding: 8px 16px !important;
+  background: #111827 !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid #374151 !important;
+  box-shadow: none !important;
+}
+body.app-ui > div.flex.flex-col.min-h-screen > header > div { height: 48px; min-height: 48px; }
+body.app-ui > div.flex.flex-col.min-h-screen > header img { height: 32px !important; }
+body.app-ui > div.flex.flex-col.min-h-screen > header nav a { color: #cbd5e1 !important; }
+body.app-ui > div.flex.flex-col.min-h-screen > header nav a:hover,
+body.app-ui > div.flex.flex-col.min-h-screen > header nav a[aria-current="page"] { background: #263244 !important; color: #f8fafc !important; }
