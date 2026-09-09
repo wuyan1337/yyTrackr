@@ -835,7 +835,8 @@ func (h *SubscriptionHandler) ExportCSV(c *gin.Context) {
 		return
 	}
 
-	c.Header("Content-Type", "text/csv")
+	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Writer.Write([]byte{0xEF, 0xBB, 0xBF})
 	c.Header("Content-Disposition", "attachment; filename=subscriptions.csv")
 
 	writer := csv.NewWriter(c.Writer)
@@ -885,7 +886,7 @@ func (h *SubscriptionHandler) ExportJSON(c *gin.Context) {
 		return
 	}
 
-	c.Header("Content-Type", "application/json")
+	c.Header("Content-Type", "application/json; charset=utf-8")
 	c.Header("Content-Disposition", "attachment; filename=subscriptions.json")
 
 	c.JSON(http.StatusOK, gin.H{
