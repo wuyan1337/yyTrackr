@@ -1,0 +1,30 @@
+/* Scoped subscription modal: neutral boundaries, no glow or gradients. */
+.app-ui #modal-content > .subscription-form,
+.app-ui #modal-content > div {
+    background: var(--app-surface) !important;
+    border: 1px solid var(--app-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,.28) !important;
+}
+.app-ui #modal-content input:not([type="checkbox"]):not([type="radio"]),
+.app-ui #modal-content select,
+.app-ui #modal-content textarea {
+    border: 1px solid var(--app-border) !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+.app-ui #modal-content :is(input, select, textarea):focus {
+    border-color: #8da4b2 !important;
+    box-shadow: none !important;
+    outline: 2px solid rgba(141,164,178,.35) !important;
+    outline-offset: 1px;
+}
+.app-ui #modal-content button[type="submit"] {
+    background: #475c69 !important; color: #fff !important;
+    border: 1px solid #687d89 !important; box-shadow: none !important;
+}
+.app-ui #modal-content #add-category-btn {
+    background: transparent !important; color: #c7d6df !important;
+    border: 1px solid var(--app-border) !important; box-shadow: none !important;
+}
+.app-ui #modal-content button:hover { filter: brightness(1.08); transform: none !important; }
