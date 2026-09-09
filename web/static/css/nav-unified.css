@@ -1,38 +1,23 @@
-/* Shared navigation treatment for authenticated pages. Keep template DOM and behavior intact. */
-.anime-app-shell > header, .app-ui > header { background:rgba(255,255,255,.92); border-bottom:1px solid #e5e7eb; box-shadow:0 4px 18px rgba(15,23,42,.06); position:relative; z-index:20; }
-.anime-app-shell > header > div, .app-ui > header > div { min-height:52px; }
-.anime-app-shell header img, .app-ui header img { height:2rem; width:auto; }
-.anime-app-shell header nav a, .app-ui header nav a { border-radius:.65rem; color:#4b5563; font-size:.875rem; font-weight:600; padding:.6rem .8rem; transition:background .15s,color .15s; }
-.anime-app-shell header nav a:hover, .app-ui header nav a:hover { background:#f3f4f6; color:#111827; }
-.anime-app-shell header nav a[aria-current="page"], .app-ui header nav a[aria-current="page"] { background:#ede9fe; color:#6d28d9; }
-#mobile-menu { z-index:50; }
-#mobile-menu > nav, #mobile-menu nav.fixed { background:#fff; box-shadow:10px 0 30px rgba(15,23,42,.16); }
-#mobile-menu nav a { border-radius:.65rem; color:#374151; font-size:.95rem; font-weight:600; }
-#mobile-menu nav a:hover, #mobile-menu nav a[aria-current="page"] { background:#ede9fe; color:#6d28d9; }
-#mobile-menu button { color:#374151; }
-@media (prefers-color-scheme: dark) {
- .anime-app-shell > header, .app-ui > header { background:rgba(31,41,55,.95); border-color:#374151; }
- .anime-app-shell header nav a, .app-ui header nav a, #mobile-menu nav a, #mobile-menu button { color:#d1d5db; }
- .anime-app-shell header nav a:hover, .app-ui header nav a:hover, #mobile-menu nav a:hover { background:#374151; color:#fff; }
- #mobile-menu > nav, #mobile-menu nav.fixed { background:#1f2937; }
-}
-
-/* Final legacy reset: identical shell for every authenticated page. */
-html, body.app-ui { margin: 0 !important; padding: 0 !important; }
-body.app-ui > div.flex.flex-col.min-h-screen > header,
-body.app-ui > div.flex.flex-col.min-h-screen > .anime-header {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 64px;
-  height: 64px;
-  padding: 8px 16px !important;
-  background: #111827 !important;
-  border-top: 0 !important;
-  border-bottom: 1px solid #374151 !important;
-  box-shadow: none !important;
-}
-body.app-ui > div.flex.flex-col.min-h-screen > header > div { height: 48px; min-height: 48px; }
-body.app-ui > div.flex.flex-col.min-h-screen > header img { height: 32px !important; }
-body.app-ui > div.flex.flex-col.min-h-screen > header nav a { color: #cbd5e1 !important; }
-body.app-ui > div.flex.flex-col.min-h-screen > header nav a:hover,
-body.app-ui > div.flex.flex-col.min-h-screen > header nav a[aria-current="page"] { background: #263244 !important; color: #f8fafc !important; }
+/* One navigation component. Legacy theme/header selectors are excluded at source. */
+html, body.app-ui { margin: 0; padding: 0; }
+.unified-header, .unified-header * { box-sizing: border-box; }
+.unified-header { position: relative; z-index: 40; width: 100%; margin: 0; padding: 0; background: #141618; color: #dce1e7; border-bottom: 1px solid #34383d; }
+.unified-header-inner { display: flex; align-items: center; gap: 24px; max-width: 1280px; min-height: 64px; margin: 0 auto; padding: 8px 16px; }
+.unified-logo { display: flex; flex: 0 0 auto; }
+.unified-logo img, .unified-mobile-top img { display: block; width: auto; height: 32px; }
+.unified-nav, .unified-actions { display: flex; align-items: center; gap: 4px; }
+.unified-actions { margin-left: auto; }
+.unified-header .unified-link, .unified-header .unified-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 8px; background: transparent; color: #cbd5e1; font: 600 14px/1.4 system-ui, sans-serif; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.unified-header .unified-link:hover, .unified-header .unified-button:hover, .unified-header .unified-active { background: #29313b; color: #fff; }
+.unified-header a:focus-visible, .unified-header button:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }
+.unified-header .unified-icon { display: block; width: 20px; height: 20px; flex: 0 0 20px; }
+.unified-header #mobile-menu-button { display: none; }
+.unified-mobile-menu { position: fixed; inset: 0; z-index: 100; }
+.unified-mobile-menu.hidden { display: none; }
+.unified-backdrop { position: absolute; inset: 0; background: #0009; }
+.unified-mobile-panel { position: absolute; inset: 0 auto 0 0; width: min(288px, 90vw); padding: 16px; overflow-y: auto; background: #141618; box-shadow: 8px 0 24px #0005; }
+.unified-mobile-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.unified-mobile-nav { display: flex; flex-direction: column; gap: 4px; }
+.unified-mobile-nav .unified-link { justify-content: flex-start; }
+@media (min-width: 768px) { .unified-mobile-menu { display: none; } }
+@media (max-width: 767px) { .unified-nav { display: none; } .unified-header #mobile-menu-button { display: inline-flex; } .unified-header-inner { gap: 12px; } }
